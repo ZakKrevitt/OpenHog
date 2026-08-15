@@ -1,5 +1,5 @@
 /**
- * `openhog demo` — make an empty project look like a real one.
+ * `openhog demo` - make an empty project look like a real one.
  *
  * Two audiences: someone evaluating OpenHog who has no traffic yet, and a team
  * that has just instrumented and wants to see the charts work before real data

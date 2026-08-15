@@ -52,13 +52,15 @@ export function parseArgs(argv: string[]): Argv {
 }
 
 const HELP = `
-${color.bold('openhog')} — read your codebase, instrument it, and build PostHog dashboards
+${color.bold('openhog')} - read your codebase, instrument it, and build PostHog dashboards
           that are actually about your product.
 
 ${color.bold('USAGE')}
   npx openhog <command> [options]
 
 ${color.bold('COMMANDS')}
+  ${color.cyan('explain')}    ${color.bold('Read your PostHog data and tell you what to do about it')}
+             No repo, no config, no code changes. Just a key.
   ${color.cyan('init')}       Scan the repo, write a tracking plan, build dashboards, write the guide
   ${color.cyan('sync')}       Rebuild dashboards from the tracking plan (run after editing it)
   ${color.cyan('doctor')}     Why is nothing arriving? Checks CSP, keys, SDK config, live ingest
@@ -78,6 +80,8 @@ ${color.bold('COMMON OPTIONS')}
   --json              Machine-readable output where supported
 
 ${color.bold('EXAMPLES')}
+  npx openhog explain                   ${color.grey('# what is wrong with my product?')}
+  npx openhog explain --open            ${color.grey('# and open the shareable report')}
   npx openhog init                      ${color.grey('# the one-command setup')}
   npx openhog init --region eu --yes    ${color.grey('# unattended, EU cloud')}
   npx openhog doctor                    ${color.grey('# nothing is showing up in PostHog')}
@@ -105,6 +109,11 @@ async function main(): Promise<number> {
   }
 
   switch (argv.command) {
+    case 'explain':
+    case 'diagnose': {
+      const { runExplain } = await import('./commands/explain.js')
+      return runExplain(argv)
+    }
     case 'init': {
       const { runInit } = await import('./commands/init.js')
       return runInit(argv)

@@ -24,7 +24,7 @@ export const ecommercePack: Pack = {
     return compact([
       dashboard({
         key: 'ecommerce-funnel',
-        name: 'Ecommerce — the cart funnel',
+        name: 'Ecommerce - the cart funnel',
         description:
           'From landing to paid, and every place money leaks out on the way. Abandonment gets its own tiles because it is where the recoverable revenue is.',
         question: 'How much revenue is leaking, and at which step?',
@@ -34,7 +34,7 @@ export const ecommercePack: Pack = {
             name: 'Orders',
             description: 'Completed purchases in the last 7 days, against the week before.',
             interpretation:
-              'Check this against the same week last year, not last week — almost every store is seasonal enough that week-on-week is noise.',
+              'Check this against the same week last year, not last week - almost every store is seasonal enough that week-on-week is noise.',
             width: 'third',
             query: bigNumber({ event: purchase ?? pageView, math: 'total' }, '-7d'),
             requires: [purchase],
@@ -126,7 +126,7 @@ export const ecommercePack: Pack = {
       }),
       dashboard({
         key: 'ecommerce-discovery',
-        name: 'Ecommerce — discovery',
+        name: 'Ecommerce - discovery',
         description: 'How people find things to buy, and what happens when they cannot.',
         question: 'Can people find what they came for?',
         tiles: [

@@ -182,7 +182,11 @@ export function buildProductProfile(root: string, files: string[]): ProductProfi
 
   const name =
     readmeTitle ??
-    meta.title?.split(/\s[|–—-]\s/)[0]?.trim() ??
+    // Splits "Lantern | live music" and its dash-separated variants. The dash
+    // characters are written as unicode escapes and the plain hyphen is last in
+    // the class, so this can never be read as a character range no matter what a
+    // find-and-replace over the source does to literal dashes.
+    meta.title?.split(/\s[|\u2013\u2014-]\s/)[0]?.trim() ??
     pkg?.name?.replace(/^@[^/]+\//, '') ??
     basename(root)
 
@@ -301,7 +305,7 @@ export function guessProductKind(
 
   // B2B software essentially always talks about teams, workspaces or seats
   // somewhere. Without that vocabulary, a "saas" verdict that only narrowly beat
-  // "consumer" is usually a consumer product with a payment provider in it —
+  // "consumer" is usually a consumer product with a payment provider in it -
   // and picking saas there gives it trial-conversion dashboards it can never
   // fill instead of the viral-loop ones it needs.
   const hasTeamVocabulary = has('team', 'workspace', 'organisation', 'organization', 'seat', 'tenant', 'b2b')

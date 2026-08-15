@@ -257,7 +257,7 @@ export interface PackTile {
   /**
    * Every event this tile's query actually references, derived from the query
    * rather than declared. A funnel may include optional steps that are not hard
-   * requirements — a pricing step that only appears for products that have one —
+   * requirements - a pricing step that only appears for products that have one -
    * so `requires` under-reports what is charted.
    *
    * This is the field the "no invented events" guarantee is checked against.

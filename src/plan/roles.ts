@@ -7,8 +7,8 @@
  * everybody, which is why hosted setup wizards produce dashboards full of empty
  * tiles: they guess a name, the guess misses, and nobody goes back to fix it.
  *
- * So packs are written against *roles* — `signup_completed`, `purchase`,
- * `share` — and this module resolves each role to whatever the repository
+ * So packs are written against *roles* - `signup_completed`, `purchase`,
+ * `share` - and this module resolves each role to whatever the repository
  * actually emits. A role that resolves to nothing is not a failure; it means
  * every tile that needed it is skipped, and the walkthrough says which event to
  * add to get that tile back.
@@ -57,7 +57,7 @@ interface RoleRule {
   /**
    * Patterns that indicate the role but are too loose to beat a precise match.
    * `_click$` describes half the events in a typical app, so on its own it must
-   * never outrank `_detail_opened$` for the `content_opened` role — otherwise a
+   * never outrank `_detail_opened$` for the `content_opened` role - otherwise a
    * codebase with both gets its dashboards built on the vaguer of the two.
    */
   weak?: RegExp[]
@@ -306,7 +306,7 @@ function scoreEvent(name: string, rule: RoleRule): number {
   }
   score(rule.include, rule.weight, 3)
   // A weak match always loses to any strong match on the same role, but still
-  // beats nothing at all — a codebase with only `item_click` should get its
+  // beats nothing at all - a codebase with only `item_click` should get its
   // content charts rather than none.
   score(rule.weak, Math.max(1, rule.weight - 3), 1)
   return best
@@ -319,15 +319,37 @@ function scoreEvent(name: string, rule: RoleRule): number {
  * must not resolve a role, or the resulting dashboard would reference a name
  * nothing sends, which is the exact failure this whole module exists to stop.
  */
-export function resolveRoles(events: PlanEvent[]): Record<EventRole, RoleResolution> {
+export interface ResolveOptions {
+  /**
+   * Event name → how many people trigger it. Used to break ties.
+   *
+   * When resolving against a live PostHog project rather than source code, two
+   * events often both look like a signup. The one fired by ten thousand people
+   * is the real one; the one fired by eleven is a leftover from an experiment,
+   * and picking it produces a chart that looks broken and a finding that is
+   * simply wrong.
+   */
+  volumes?: Record<string, number>
+}
+
+export function resolveRoles(
+  events: PlanEvent[],
+  options: ResolveOptions = {},
+): Record<EventRole, RoleResolution> {
   const emitted = events.filter((event) => event.emitted).map((event) => event.name)
   const result = {} as Record<EventRole, RoleResolution>
+  const volume = (name: string) => options.volumes?.[name] ?? 0
 
   for (const [role, rule] of Object.entries(RULES) as [EventRole, RoleRule][]) {
     const scored = emitted
       .map((name) => ({ name, score: scoreEvent(name, rule) }))
       .filter((entry) => entry.score > 0)
-      .sort((a, b) => b.score - a.score || a.name.length - b.name.length)
+      .sort(
+        (a, b) =>
+          b.score - a.score ||
+          volume(b.name) - volume(a.name) ||
+          a.name.length - b.name.length,
+      )
 
     result[role] = {
       role,

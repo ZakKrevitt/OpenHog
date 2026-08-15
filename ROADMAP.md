@@ -6,19 +6,19 @@ What is built, and what would make this spread. Ordered by leverage, not by effo
 
 ## Shipped in 0.1
 
-- **Codebase scan** — framework, routes, product description, feature signals, and
+- **Codebase scan** - framework, routes, product description, feature signals, and
   existing analytics call sites across 20+ frameworks
-- **Role resolution** — dashboard packs written against semantic roles, resolved to
+- **Role resolution** - dashboard packs written against semantic roles, resolved to
   whatever this codebase happens to call things
 - **Tracking plan** as reviewable, hand-editable JSON that survives regeneration
 - **Hardened analytics module** with all four production traps closed
 - **8 dashboard packs**, 20+ dashboards, every tile carrying a "how to read it"
-- **Query validation** — every tile is executed against the project before it is
+- **Query validation** - every tile is executed against the project before it is
   created, so a broken tile is reported rather than shipped
-- **`openhog doctor`** — CSP, keys, SDK config, project settings, live round-trip
-- **`openhog check`** — drift detection, no network, hook-ready
-- **`openhog demo`** — synthetic data with realistic funnel and retention shape
-- **`ANALYTICS.md` generation** — the walkthrough, tailored to the dashboards built
+- **`openhog doctor`** - CSP, keys, SDK config, project settings, live round-trip
+- **`openhog check`** - drift detection, no network, hook-ready
+- **`openhog demo`** - synthetic data with realistic funnel and retention shape
+- **`ANALYTICS.md` generation** - the walkthrough, tailored to the dashboards built
 - **MCP server** and **Claude Code plugin**
 - Zero runtime dependencies
 
@@ -62,7 +62,7 @@ credit, and a "packs wanted" issue list. The vertical list in
 [![Instrumented with OpenHog](https://img.shields.io/badge/analytics-OpenHog-f54e00)](https://github.com/ZakKrevitt/OpenHog)
 ```
 
-Better: a **dynamic badge** driven by `openhog check` — events tracked, roles
+Better: a **dynamic badge** driven by `openhog check` - events tracked, roles
 resolved, drift status. A badge that shows a real number is a badge people keep.
 
 ### 5. Reverse-proxy setup as a first-class command
@@ -84,7 +84,7 @@ at once; a digest arrives whether or not anyone remembers.
 19%." A data network effect that gets better with adoption and gives people a reason
 to come back.
 
-Only if it can be done without collecting anything identifying — bucketed metrics,
+Only if it can be done without collecting anything identifying - bucketed metrics,
 no event names, no URLs, explicit opt-in, and the aggregation code public. If that
 cannot be guaranteed, it does not ship.
 
@@ -96,25 +96,25 @@ tools they dislike; removing that is worth more than any feature.
 
 ### 9. Framework starter integrations
 
-A `create-next-app` template, an Astro integration, a Vite plugin — analytics
+A `create-next-app` template, an Astro integration, a Vite plugin - analytics
 correct from the first commit rather than bolted on at month six.
 
 ---
 
 ## Product depth
 
-- **`openhog eject`** — inline everything, remove the dependency, prove there is no
+- **`openhog eject`** - inline everything, remove the dependency, prove there is no
   lock-in
 - **Server-side plan generation** for Python, Go, Ruby and Swift call sites (the
   scanner sees these files; the emitters do not yet write for them)
-- **Cohort and feature-flag awareness** — dashboards split by flag when experiments
+- **Cohort and feature-flag awareness** - dashboards split by flag when experiments
   are running
-- **Revenue** — LTV, payback and cohort revenue where a payment provider is detected
-- **Alerting** — `openhog watch` on the instrumentation-health tiles, so a broken
+- **Revenue** - LTV, payback and cohort revenue where a payment provider is detected
+- **Alerting** - `openhog watch` on the instrumentation-health tiles, so a broken
   event pages someone within a day instead of at the quarterly review
-- **Annotations from git** — write a PostHog annotation on every deploy so a chart
+- **Annotations from git** - write a PostHog annotation on every deploy so a chart
   step-change lines up with a commit
-- **`openhog fix`** — apply the doctor's fixes as an actual patch, not prose
+- **`openhog fix`** - apply the doctor's fixes as an actual patch, not prose
 - **A/B test scaffolding** that stays honest about statistical power
 
 ---

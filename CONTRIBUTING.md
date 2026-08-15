@@ -7,7 +7,7 @@ npm install
 npm run verify     # typecheck + 205 tests + build
 ```
 
-Node ≥ 20.11. No runtime dependencies — please keep it that way. `npx openhog`
+Node ≥ 20.11. No runtime dependencies - please keep it that way. `npx openhog`
 installing in about a second, and being auditable in an afternoon, is part of why
 anyone trusts it with an API key.
 
@@ -15,7 +15,7 @@ anyone trusts it with an API key.
 
 ## The four things worth contributing
 
-### 1. A dashboard pack — highest leverage
+### 1. A dashboard pack - highest leverage
 
 One file. You know a vertical better than we do, and the metric that matters in it is
 probably on none of the general dashboards. **[docs/PACKS.md](./docs/PACKS.md)** is
@@ -25,7 +25,7 @@ the full guide.
 
 Hit a production-only analytics failure? That is a twenty-line addition to
 `src/doctor/index.ts` that stops the next person losing a week. Include the
-**symptom** (what the user sees), the **cause**, and the **fix** — the fix text is
+**symptom** (what the user sees), the **cause**, and the **fix** - the fix text is
 what people actually read. Add it to [docs/TRAPS.md](./docs/TRAPS.md) too.
 
 ### 3. Framework and library detection
@@ -54,7 +54,7 @@ npx vitest tests/packs      # one file
   (`tests/fixtures.ts`). The scanner's job is reading a real filesystem, so an
   in-memory abstraction would prove nothing.
 - **The PostHog mock is a real HTTP server** (`tests/mockPosthog.ts`). The things
-  most likely to be wrong are header handling, status-code branching and retries —
+  most likely to be wrong are header handling, status-code branching and retries -
   none of which a stubbed `fetch` would catch.
 - **`tests/packs.test.ts` runs over every registered pack**, asserting each tile has
   a real interpretation and charts only events the plan says are emitted. A thin pack
@@ -69,7 +69,7 @@ Adding a behaviour means adding a test that fails without it.
 ## House style
 
 - Comments explain **why**, never what. If a line is there because its absence broke
-  production, say which failure — that is the only thing that stops someone
+  production, say which failure - that is the only thing that stops someone
   "simplifying" it back out.
 - Prefer explicit lists over clever regexes. An unmatched framework should be a
   one-line addition, not a puzzle.

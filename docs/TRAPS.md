@@ -87,7 +87,7 @@ export function syncRoute(pathname: string) {
 }
 ```
 
-The guard matters — see trap 4, where init calls `syncRoute` again to catch up.
+The guard matters - see trap 4, where init calls `syncRoute` again to catch up.
 
 **Check it.** The **Instrumentation health** dashboard plots `$pageview` against
 `$pageleave`. They should track each other closely. Divergence means your traffic
@@ -101,7 +101,7 @@ numbers are wrong.
 **Symptom.** Custom events are fine. Web Analytics shows zero visitors and no
 top-pages data, even though `$pageview` events are clearly arriving.
 
-**Cause.** Stripping ids out of URLs is correct — `/list/sh4r3c0d3` is high
+**Cause.** Stripping ids out of URLs is correct - `/list/sh4r3c0d3` is high
 cardinality and often sensitive. But going all the way to a bare path removes the
 **origin**, and Web Analytics parses `$current_url` to attribute a visit to a
 domain. No domain, no attribution, nothing to report.
@@ -132,13 +132,13 @@ Apply it to all six URL-bearing properties: `$current_url`, `$initial_current_ur
 ## 4. Replay starts on the first navigation, never on landing
 
 **Symptom.** Recordings exist, but every one starts mid-session. Nobody's arrival is
-ever recorded. Sessions where someone landed, looked, and left — the ones most worth
-watching — do not exist at all.
+ever recorded. Sessions where someone landed, looked, and left - the ones most worth
+watching - do not exist at all.
 
 **Cause.** The SDK is imported dynamically so it lands in its own chunk. Your route
 effect runs on mount, while the import is still in flight and the instance is still
 `null`, so the call that would have started recording did nothing. Recording only
-begins on the *next* route change — and a bouncing visitor never has one.
+begins on the *next* route change - and a bouncing visitor never has one.
 
 **Fix.** Catch up after the import resolves:
 
@@ -169,7 +169,7 @@ is worst on your most technical pages.
 
 **Why it's worse than it sounds.** It isn't a random 15–30%. Technical and
 privacy-conscious users are heavily over-represented among blockers, so a developer
-tool loses far more than a consumer app — and every segment comparison you draw is
+tool loses far more than a consumer app - and every segment comparison you draw is
 skewed, not merely undercounted.
 
 **Fix.** Reverse-proxy PostHog through your own domain.
@@ -240,7 +240,7 @@ full URL, a timestamp, a price.
 |---|---|
 | `price: 19.99` | `price_bucket: 'under_20'` |
 | `query: 'techno berlin friday'` | `query_length_bucket: 'medium'` |
-| `event_id: '9f2c...'` | nothing — it belongs in the event, not the breakdown |
+| `event_id: '9f2c...'` | nothing - it belongs in the event, not the breakdown |
 | `latency_ms: 4193` | `latency_bucket: 'slow'` |
 | `url: 'https://x.com/list/abc'` | `route: '/list/:shareCode'` |
 
@@ -259,5 +259,5 @@ npx openhog doctor --json       # machine-readable, for CI
 ```
 
 Found a production-only failure that isn't here?
-[Open an issue](https://github.com/ZakKrevitt/OpenHog/issues) — a new doctor check is
+[Open an issue](https://github.com/ZakKrevitt/OpenHog/issues) - a new doctor check is
 usually a twenty-line PR and it stops the next person losing a week.

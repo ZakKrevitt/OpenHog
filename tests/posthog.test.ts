@@ -233,7 +233,7 @@ describe('syncing to PostHog', () => {
   it('leaves an existing dashboard alone unless asked to replace it', async () => {
     mock.state.dashboards.push({
       id: 1,
-      name: '1. North Star — activation & retention',
+      name: '1. North Star - activation & retention',
       description: '',
       deleted: false,
       tiles: [],
@@ -245,7 +245,7 @@ describe('syncing to PostHog', () => {
       dashboards: buildDashboards(plan, [corePack]),
       validate: false,
     })
-    expect(result.skippedExisting).toContain('1. North Star — activation & retention')
+    expect(result.skippedExisting).toContain('1. North Star - activation & retention')
   })
 
   it('sets tile layouts after the insights exist', async () => {

@@ -25,7 +25,7 @@ export const devtoolPack: Pack = {
     return compact([
       dashboard({
         key: 'devtool-ttfs',
-        name: 'Dev tool — time to first success',
+        name: 'Dev tool - time to first success',
         description:
           'The only funnel that matters for a developer product: from discovering it to having it work once. Everything else is downstream of this.',
         question: 'How long does it take to get it working, and how many give up?',

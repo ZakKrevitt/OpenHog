@@ -4,7 +4,7 @@
  *
  * Real HTTP rather than a stubbed fetch, because the things most likely to be
  * wrong are header handling, status-code branching, retry behaviour and JSON
- * framing — none of which a stub would catch.
+ * framing - none of which a stub would catch.
  */
 
 import { createServer, type Server } from 'node:http'
@@ -15,6 +15,12 @@ export interface MockState {
   insights: { id: number; name: string; query: unknown; dashboards: number[] }[]
   /** Queries that should fail, to exercise tile validation. */
   failQueriesMatching?: RegExp
+  /**
+   * Canned HogQL answers, matched in order against the query text. Lets a test
+   * drive the whole metrics and findings pipeline with a realistic project
+   * shape instead of one magic number for every question.
+   */
+  hogql?: { match: RegExp; rows: unknown[][]; columns?: string[] }[]
   /** Respond 429 this many times before succeeding. */
   rateLimitTimes?: number
   /** Force a scope failure on this path fragment. */
@@ -145,6 +151,12 @@ export async function startMockPostHog(initial: Partial<MockState> = {}): Promis
         const text = JSON.stringify(input.query ?? {})
         if (state.failQueriesMatching?.test(text)) {
           return json(400, { detail: 'Unsupported function in HogQL query' })
+        }
+        const sql = input.query?.query ?? ''
+        for (const canned of state.hogql ?? []) {
+          if (canned.match.test(sql)) {
+            return json(200, { results: canned.rows, columns: canned.columns ?? [] })
+          }
         }
         return json(200, { results: [[42]], columns: ['count'] })
       }

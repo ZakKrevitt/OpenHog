@@ -1,5 +1,5 @@
 /**
- * `openhog auth` — connect, re-connect, check, or forget a personal API key.
+ * `openhog auth` - connect, re-connect, check, or forget a personal API key.
  *
  * `--instructions` prints the same walk as JSON, for a coding agent with
  * browser control that can do the clicking on the user's behalf. The key itself

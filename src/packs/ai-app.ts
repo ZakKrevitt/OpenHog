@@ -26,7 +26,7 @@ export const aiAppPack: Pack = {
     return compact([
       dashboard({
         key: 'ai-usage',
-        name: 'AI — generation & quality',
+        name: 'AI - generation & quality',
         description:
           'What the model is being asked to do and whether the answer was good enough to keep. Retries and regenerations are treated as quality signals, because that is what they are.',
         question: 'Is the model producing things people actually keep?',
@@ -70,7 +70,7 @@ export const aiAppPack: Pack = {
             name: 'Generate → keep',
             description: 'From a generation to the person saving, sharing or otherwise keeping the output.',
             interpretation:
-              'The closest thing to a quality metric you can get without asking anyone. If keep rate falls after a model or prompt change, roll it back — this catches regressions that evals miss.',
+              'The closest thing to a quality metric you can get without asking anyone. If keep rate falls after a model or prompt change, roll it back - this catches regressions that evals miss.',
             width: 'half',
             query: funnel({
               series: [generate, save ?? share]
@@ -101,7 +101,7 @@ export const aiAppPack: Pack = {
             name: 'Failed generations',
             description: 'Errors during generation over time.',
             interpretation:
-              'Separate provider failures from prompt failures if you can — they need different fixes and only one of them is yours. Either way a person who sees two failures in a row usually does not come back.',
+              'Separate provider failures from prompt failures if you can - they need different fixes and only one of them is yours. Either way a person who sees two failures in a row usually does not come back.',
             width: 'half',
             query: trends({
               series: [

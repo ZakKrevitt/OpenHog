@@ -62,7 +62,7 @@ const RULES: SuggestionRule[] = [
         { name: 'method', type: 'enum', values: ['email', 'google', 'apple', 'github', 'sso'], description: 'How they signed up.' },
         { name: 'invited_by_referral', type: 'boolean', description: 'Whether they arrived through an invite. Splits organic from viral growth.' },
       ],
-      ['Wherever the account record is created — after the server confirms it, not on button click.'],
+      ['Wherever the account record is created - after the server confirms it, not on button click.'],
     ),
   },
   {
@@ -147,7 +147,7 @@ const RULES: SuggestionRule[] = [
       'Something was pushed out of the product. The input to every viral loop.',
       [
         { name: 'channel', type: 'enum', values: ['copy_link', 'native', 'email', 'whatsapp', 'x', 'other'], description: 'Where it went.' },
-        { name: 'object_type', type: 'string', description: 'What was shared, as a type name — never the id.' },
+        { name: 'object_type', type: 'string', description: 'What was shared, as a type name - never the id.' },
       ],
       ['Every share control. Fire on the share action, not on the menu opening.'],
     ),

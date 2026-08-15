@@ -1,5 +1,5 @@
 /**
- * `openhog doctor` — the command people will share.
+ * `openhog doctor` - the command people will share.
  *
  * Works without a config file and without a PostHog connection, degrading to
  * whatever it can check, because the person running it is usually mid-panic

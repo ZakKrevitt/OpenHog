@@ -1,5 +1,5 @@
 /**
- * `openhog demo` — fill a project with realistic synthetic behaviour.
+ * `openhog demo` - fill a project with realistic synthetic behaviour.
  *
  * An empty dashboard teaches nobody anything. Somebody evaluating whether this
  * is worth adopting needs to see what the charts look like when they work, and

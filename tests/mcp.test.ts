@@ -3,7 +3,7 @@
  * JSON-RPC over stdio, against the compiled binary.
  *
  * The protocol is implemented by hand to keep the package dependency-free, so
- * the framing rules are ours to get wrong — notably that a notification carries
+ * the framing rules are ours to get wrong - notably that a notification carries
  * no id and must never be answered.
  */
 

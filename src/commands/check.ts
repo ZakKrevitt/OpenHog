@@ -1,5 +1,5 @@
 /**
- * `openhog check` — has the code drifted from the plan?
+ * `openhog check` - has the code drifted from the plan?
  *
  * No network, no API key, fast enough for a pre-commit hook. Exits 1 when an
  * event the plan says is emitted has vanished from the code, because that is

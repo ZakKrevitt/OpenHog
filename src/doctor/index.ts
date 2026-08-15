@@ -1,5 +1,5 @@
 /**
- * `openhog doctor` — why is nothing arriving?
+ * `openhog doctor` - why is nothing arriving?
  *
  * Every check here encodes a failure that is invisible in development. Dev
  * serves no CSP header, the unit suite never fetches a third-party asset, and
@@ -115,7 +115,7 @@ function extractPolicies(content: string): string[] {
 
   // A real policy declares at least two directives. Without this floor, the
   // single-quote extractor happily returns the text *between* two `'self'`
-  // tokens — a fragment like "…posthog.com; connect-src " that reads as a
+  // tokens - a fragment like "…posthog.com; connect-src " that reads as a
   // policy whose connect-src is empty, and reports a passing CSP as broken.
   return candidates.filter((candidate) => {
     const directives = candidate.match(/(?:^|;)\s*[a-z][a-z-]*-src\s/g) ?? []
@@ -169,15 +169,15 @@ export function checkContentSecurityPolicy(context: DoctorContext): CheckResult 
       inspectedAny = true
 
       if (connectSrc !== null && !connectSrc.includes(new URL(ingestHost).host)) {
-        problems.push(`${file}: connect-src is missing ${ingestHost} — no events can be sent at all.`)
+        problems.push(`${file}: connect-src is missing ${ingestHost} - no events can be sent at all.`)
       }
       if (scriptSrc !== null && !scriptSrc.includes(new URL(assetHost).host)) {
         problems.push(
-          `${file}: script-src is missing ${assetHost} — events will flow but session replay can never load its recorder.`,
+          `${file}: script-src is missing ${assetHost} - events will flow but session replay can never load its recorder.`,
         )
       }
       if (connectSrc !== null && !connectSrc.includes(new URL(assetHost).host)) {
-        problems.push(`${file}: connect-src is missing ${assetHost} — replay and toolbar assets are blocked.`)
+        problems.push(`${file}: connect-src is missing ${assetHost} - replay and toolbar assets are blocked.`)
       }
     }
   }
@@ -441,7 +441,7 @@ export async function checkLiveIngest(context: DoctorContext): Promise<CheckResu
     name: 'Live round-trip',
     status: 'fail',
     message: 'The test event was accepted by ingest but never appeared in queries within 30s.',
-    fix: 'Usually ingestion lag on a busy project — re-run in a minute. If it persists, check that the project key belongs to the project id you are querying.',
+    fix: 'Usually ingestion lag on a busy project - re-run in a minute. If it persists, check that the project key belongs to the project id you are querying.',
   }
 }
 
@@ -472,7 +472,7 @@ export async function checkEventsArriving(context: DoctorContext): Promise<Check
         name: 'Events arriving',
         status: 'fail',
         message: 'None of your planned events have ever reached PostHog.',
-        fix: 'The SDK is not initialising in production. Work through the CSP, project key and live round-trip checks above — one of them is the cause.',
+        fix: 'The SDK is not initialising in production. Work through the CSP, project key and live round-trip checks above - one of them is the cause.',
       }
     }
     return {
@@ -505,7 +505,7 @@ export function checkAdBlockerExposure(context: DoctorContext): CheckResult {
     name: 'Ad-blocker exposure',
     status: 'warn',
     message: `Events go directly to ${host}, which most ad blockers block.`,
-    fix: 'Typically 15-30% of traffic never reports, and it is not a random 15-30% — technical and privacy-conscious users are heavily over-represented, so your numbers are skewed as well as low. Serve PostHog through a reverse proxy on your own domain (a rewrite in vercel.json or next.config.js) and point the SDK at that path.',
+    fix: 'Typically 15-30% of traffic never reports, and it is not a random 15-30% - technical and privacy-conscious users are heavily over-represented, so your numbers are skewed as well as low. Serve PostHog through a reverse proxy on your own domain (a rewrite in vercel.json or next.config.js) and point the SDK at that path.',
     docs: 'TRAPS.md#ad-blockers',
   }
 }

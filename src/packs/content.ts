@@ -25,7 +25,7 @@ export const contentPack: Pack = {
     return compact([
       dashboard({
         key: 'content-performance',
-        name: 'Content — what earns attention',
+        name: 'Content - what earns attention',
         description:
           'Which pieces bring people in, which keep them, and which turn a reader into someone who comes back on purpose.',
         question: 'Which writing is doing the work?',
@@ -128,7 +128,7 @@ export const contentPack: Pack = {
             name: 'Saved to read later',
             description: 'Bookmarks and saves.',
             interpretation:
-              'A save is a promise to return. Whether people keep that promise is visible in the return-readers tile — if saves are high and returns are low, a reminder is doing real work for the reader.',
+              'A save is a promise to return. Whether people keep that promise is visible in the return-readers tile - if saves are high and returns are low, a reminder is doing real work for the reader.',
             width: 'half',
             query: trends({ series: [{ event: save ?? pageView, math: 'total' }], dateFrom: '-60d' }),
             requires: [save],

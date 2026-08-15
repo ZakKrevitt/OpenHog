@@ -57,7 +57,7 @@ export function emitWalkthrough(options: WalkthroughOptions): string {
     const url = dashboardUrl(created, northStar.name)
     push(
       `1. Open **${northStar.name}**${url ? ` (${url})` : ''}.`,
-      '2. Look at the **activation funnel** and find the steepest single drop. That step is your next piece of work — not the step with the fewest people, the step with the biggest percentage fall.',
+      '2. Look at the **activation funnel** and find the steepest single drop. That step is your next piece of work - not the step with the fewest people, the step with the biggest percentage fall.',
       '3. Look at the **retention curve**. Read the first column downwards. If it falls to zero by week 4 you have a leaky bucket, and no amount of acquisition will fill it.',
       '4. Open **Instrumentation health** and check the "planned events that have stopped arriving" tile is empty. If it is not, one of the charts you just read is lying to you.',
       '',
@@ -112,7 +112,7 @@ export function emitWalkthrough(options: WalkthroughOptions): string {
         '| --- | --- | --- |',
       )
       for (const event of suggested.slice(0, 30)) {
-        const where = event.suggestedLocations?.[0] ?? '—'
+        const where = event.suggestedLocations?.[0] ?? 'n/a'
         push(`| \`${event.name}\` | ${event.description.replace(/\|/g, '\\|')} | ${where.replace(/\|/g, '\\|')} |`)
       }
       push('')
@@ -127,7 +127,7 @@ export function emitWalkthrough(options: WalkthroughOptions): string {
       }
       push('Charts that would appear once those events exist:', '')
       for (const [dashboard, tiles] of byDashboard) {
-        push(`- **${dashboard}** — ${tiles.join(', ')}`)
+        push(`- **${dashboard}** - ${tiles.join(', ')}`)
       }
       push('', 'Add the events, then run `openhog sync` again. The new charts appear automatically.', '')
     }
@@ -145,13 +145,13 @@ export function emitWalkthrough(options: WalkthroughOptions): string {
   )
 
   const stages: [string, string][] = [
-    ['acquisition', 'Acquisition — how people arrive'],
-    ['activation', 'Activation — the first time it works'],
-    ['engagement', 'Engagement — ongoing use'],
-    ['conversion', 'Conversion — money'],
-    ['retention', 'Retention — coming back'],
-    ['referral', 'Referral — bringing others'],
-    ['health', 'Health — things going wrong'],
+    ['acquisition', 'Acquisition - how people arrive'],
+    ['activation', 'Activation - the first time it works'],
+    ['engagement', 'Engagement - ongoing use'],
+    ['conversion', 'Conversion - money'],
+    ['retention', 'Retention - coming back'],
+    ['referral', 'Referral - bringing others'],
+    ['health', 'Health - things going wrong'],
   ]
 
   for (const [stage, heading] of stages) {
@@ -159,7 +159,7 @@ export function emitWalkthrough(options: WalkthroughOptions): string {
     if (!inStage.length) continue
     push(`### ${heading}`, '', '| Event | Fires | Emitted from |', '| --- | --- | --- |')
     for (const event of inStage) {
-      const source = event.sources[0] ?? '—'
+      const source = event.sources[0] ?? 'n/a'
       push(
         `| \`${event.name}\` | ${event.description.replace(/\|/g, '\\|').slice(0, 160)} | \`${source}\` |`,
       )
@@ -206,9 +206,9 @@ export function emitWalkthrough(options: WalkthroughOptions): string {
     '',
     '### Properties that are always worth sending',
     '',
-    '- `surface` — which part of the product. Turns every count into a comparison.',
-    '- `route` — the normalised route. Already added for you by the generated module.',
-    '- `source` — what triggered it: a button, a deep link, a notification.',
+    '- `surface` - which part of the product. Turns every count into a comparison.',
+    '- `route` - the normalised route. Already added for you by the generated module.',
+    '- `source` - what triggered it: a button, a deep link, a notification.',
     '',
     '### Properties that will hurt you',
     '',
@@ -228,7 +228,7 @@ export function emitWalkthrough(options: WalkthroughOptions): string {
     '1. **CSP directives are separate allowlists.** A host in `connect-src` is not thereby loadable as a script. PostHog\'s asset host serves the session-replay recorder as a *script*, so replay needs it in `script-src` too. Miss that and events flow forever while `$recording_status` sits at `lazy_loading` and you get zero recordings. Dev serves no CSP at all, so this is invisible until production.',
     '2. **`capture_pageview: "history_change"` skips the first load.** It captures on history changes only, so a full page load sends `$pageleave` with no matching `$pageview`. Every direct visit and every reload goes uncounted and Web Analytics reads near zero. The generated module sends `$pageview` by hand instead.',
     '3. **Sanitising `$current_url` down to a bare path breaks Web Analytics.** It parses that field to attribute a visit to a domain, so stripping the origin attributes every visit to nothing. Strip the ids and the query string; keep the origin.',
-    '4. **Session replay starts on the first navigation, not on landing.** The SDK is imported dynamically, so the first route effect runs before the instance exists. Land-look-leave sessions — the ones most worth watching — are exactly the ones never recorded. The generated module catches up to the current route after the import resolves.',
+    '4. **Session replay starts on the first navigation, not on landing.** The SDK is imported dynamically, so the first route effect runs before the instance exists. Land-look-leave sessions - the ones most worth watching - are exactly the ones never recorded. The generated module catches up to the current route after the import resolves.',
     '',
     'Run `openhog doctor` to check all four, plus your CSP, your env vars, and whether events are actually arriving.',
     '',
@@ -245,7 +245,7 @@ export function emitWalkthrough(options: WalkthroughOptions): string {
     '',
     ...(plan.identity.sensitiveRoutes.length
       ? plan.identity.sensitiveRoutes.map((route) => `  - \`${route}\``)
-      : ['  - _(none detected — check this list is right)_']),
+      : ['  - _(none detected - check this list is right)_']),
     '',
     '  Add a route to `SENSITIVE_ROUTES` the moment it starts showing someone else\'s personal data. Recording a masked password field is one thing; recording the shape of someone\'s inbox is another, and no masking selector makes that safe.',
     '',

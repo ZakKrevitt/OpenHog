@@ -19,7 +19,7 @@ function northStar(plan: TrackingPlan): PackDashboard | null {
 
   return dashboard({
     key: 'north-star',
-    name: '1. North Star — activation & retention',
+    name: '1. North Star - activation & retention',
     description:
       'The daily check. If you only look at one dashboard, this is it. Everything here is about whether people arrive, get value, and come back.',
     question: 'Are we growing, and are the people we get sticking around?',
@@ -29,7 +29,7 @@ function northStar(plan: TrackingPlan): PackDashboard | null {
         name: 'Weekly active people',
         description: 'Unique people who did anything at all in the last 7 days, against the 7 days before.',
         interpretation:
-          'The headline number. A flat WAU with rising signups means you have a retention problem, not a growth problem — go to the retention curve below before you spend anything on acquisition.',
+          'The headline number. A flat WAU with rising signups means you have a retention problem, not a growth problem - go to the retention curve below before you spend anything on acquisition.',
         width: 'third',
         query: bigNumber({ event: pageView, math: 'dau', name: 'Active people' }, '-7d'),
         requires: [pageView],
@@ -81,7 +81,7 @@ function northStar(plan: TrackingPlan): PackDashboard | null {
         name: 'Activation funnel',
         description: 'Visit → sign up → first real action, over 14 days.',
         interpretation:
-          'The single most actionable chart in this project. The biggest percentage drop is your next piece of work — not the step with the fewest people, the step with the steepest fall.',
+          'The single most actionable chart in this project. The biggest percentage drop is your next piece of work - not the step with the fewest people, the step with the steepest fall.',
         width: 'half',
         query: funnel({
           series: [
@@ -112,7 +112,7 @@ function northStar(plan: TrackingPlan): PackDashboard | null {
       }),
       tile({
         key: 'lifecycle',
-        name: 'Lifecycle — new, returning, resurrecting, dormant',
+        name: 'Lifecycle - new, returning, resurrecting, dormant',
         description: 'Every active person each week, split by whether this is new behaviour or a return.',
         interpretation:
           'Dormant (below the line) is churn made visible. If the dormant bar is consistently bigger than new plus resurrecting, you are shrinking even while signups look healthy.',
@@ -161,7 +161,7 @@ function acquisition(plan: TrackingPlan): PackDashboard | null {
 
   return dashboard({
     key: 'acquisition',
-    name: '2. Acquisition — where people come from',
+    name: '2. Acquisition - where people come from',
     description:
       'Every channel, ranked by whether it sends people who do anything. Volume without conversion is a vanity number, so both are always on the same dashboard here.',
     question: 'Which channels send people who actually stay?',
@@ -203,7 +203,7 @@ function acquisition(plan: TrackingPlan): PackDashboard | null {
         description:
           'Per source: people, how many converted, and the rate. Sorted so the best channel is at the top, not the biggest.',
         interpretation:
-          'The table that decides your budget. A source with 40 visitors and 30% conversion beats one with 4,000 at 0.3%. Kill anything at the bottom with real volume — it is costing you money and polluting every other average on this project.',
+          'The table that decides your budget. A source with 40 visitors and 30% conversion beats one with 4,000 at 0.3%. Kill anything at the bottom with real volume - it is costing you money and polluting every other average on this project.',
         width: 'full',
         query: conversion
           ? hogql(sql`
@@ -363,7 +363,7 @@ function criticalPath(plan: TrackingPlan): PackDashboard | null {
         name: 'Same funnel, split by channel',
         description: 'The critical path, broken down by where people came from.',
         interpretation:
-          'This is how you find the channel that sends traffic which never converts. Compare against the acquisition dashboard before you conclude a channel is bad — small samples swing wildly here.',
+          'This is how you find the channel that sends traffic which never converts. Compare against the acquisition dashboard before you conclude a channel is bad - small samples swing wildly here.',
         width: 'half',
         query: funnel({
           series: [pageView, ...steps].map((event) => ({ event })),
@@ -394,7 +394,7 @@ function engagement(plan: TrackingPlan): PackDashboard | null {
 
   return dashboard({
     key: 'engagement',
-    name: '4. Engagement — what people actually do',
+    name: '4. Engagement - what people actually do',
     description:
       'Everything people do once they are in, ranked by how often. Use it to find the features nobody has discovered and the ones you could delete.',
     question: 'What is this product being used for, really?',
@@ -442,7 +442,7 @@ function engagement(plan: TrackingPlan): PackDashboard | null {
         name: 'Actions per active person',
         description: 'Average events per active person per day.',
         interpretation:
-          'Depth of use. A number that climbs while active people stay flat is the signature of a product getting more useful to the people who already have it — usually the healthiest thing on this page.',
+          'Depth of use. A number that climbs while active people stay flat is the signature of a product getting more useful to the people who already have it - usually the healthiest thing on this page.',
         width: 'half',
         query: trends({
           series: [{ event: core ?? pageView, math: 'avg_count_per_actor' }],
@@ -455,7 +455,7 @@ function engagement(plan: TrackingPlan): PackDashboard | null {
         name: 'Most-visited pages',
         description: 'Pageviews by route.',
         interpretation:
-          'Routes here should be normalised (`/items/:id`, not `/items/8f2c`). If you see raw ids, your instrumentation is leaking high-cardinality URLs — see the instrumentation health dashboard.',
+          'Routes here should be normalised (`/items/:id`, not `/items/8f2c`). If you see raw ids, your instrumentation is leaking high-cardinality URLs - see the instrumentation health dashboard.',
         width: 'half',
         query: trends({
           series: [{ event: pageView, math: 'total' }],
@@ -500,7 +500,7 @@ function engagement(plan: TrackingPlan): PackDashboard | null {
         name: 'When people use it',
         description: 'Activity by hour of day, project timezone.',
         interpretation:
-          'Decides when you deploy, when you send notifications, and when you schedule maintenance. Confirm your project timezone is right first — a UTC project misplaces every evening product by a whole peak.',
+          'Decides when you deploy, when you send notifications, and when you schedule maintenance. Confirm your project timezone is right first - a UTC project misplaces every evening product by a whole peak.',
         width: 'half',
         query: hogql(sql`
           SELECT
@@ -753,7 +753,7 @@ function instrumentationHealth(plan: TrackingPlan): PackDashboard | null {
         description:
           'Both events over time. They should track each other closely.',
         interpretation:
-          'Far more $pageleave than $pageview means the SDK is missing the first page load of each session — the classic `capture_pageview: "history_change"` trap, which silently drops every direct visit and every reload. If these lines diverge, your traffic numbers are wrong and Web Analytics will read near zero.',
+          'Far more $pageleave than $pageview means the SDK is missing the first page load of each session - the classic `capture_pageview: "history_change"` trap, which silently drops every direct visit and every reload. If these lines diverge, your traffic numbers are wrong and Web Analytics will read near zero.',
         width: 'full',
         query: trends({
           series: [

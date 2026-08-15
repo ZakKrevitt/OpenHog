@@ -28,7 +28,7 @@ export const consumerPack: Pack = {
     return compact([
       dashboard({
         key: 'consumer-loops',
-        name: 'Consumer — viral loops',
+        name: 'Consumer - viral loops',
         description:
           'Whether the product brings its own users. Every tile is one half of a loop: something pushed out, and something that came back in.',
         question: 'Does one user produce another user?',
@@ -38,7 +38,7 @@ export const consumerPack: Pack = {
             name: 'Shares',
             description: 'How often people push something out of the product.',
             interpretation:
-              'The input to every loop. If this is near zero, no amount of referral copy will help — the thing being shared is not worth sharing yet.',
+              'The input to every loop. If this is near zero, no amount of referral copy will help - the thing being shared is not worth sharing yet.',
             width: 'third',
             query: bigNumber({ event: share ?? pageView, math: 'total' }, '-7d'),
             requires: [share],
@@ -116,7 +116,7 @@ export const consumerPack: Pack = {
       }),
       dashboard({
         key: 'consumer-habit',
-        name: 'Consumer — habit & depth',
+        name: 'Consumer - habit & depth',
         description:
           'Whether using this is becoming a habit: how often people come back on their own, how deep a session goes, and whether notifications are helping or just annoying.',
         question: 'Is this becoming a habit, or a thing people tried once?',
@@ -136,7 +136,7 @@ export const consumerPack: Pack = {
             name: 'Day-by-day retention',
             description: 'Daily retention for the first two weeks after someone first appears.',
             interpretation:
-              'Consumer products live or die on day 1 and day 7. Day 1 under about 25% means the first session does not deliver anything worth returning for — that is a first-run problem, not a notification problem.',
+              'Consumer products live or die on day 1 and day 7. Day 1 under about 25% means the first session does not deliver anything worth returning for - that is a first-run problem, not a notification problem.',
             width: 'half',
             query: retention({
               targetEvent: pageView,
@@ -164,7 +164,7 @@ export const consumerPack: Pack = {
             name: 'Saves per person',
             description: 'How much people are collecting.',
             interpretation:
-              'Saving creates a reason to return that is independent of your notifications. A person with five saved things retains far better than one with none — worth building the first-run flow around.',
+              'Saving creates a reason to return that is independent of your notifications. A person with five saved things retains far better than one with none - worth building the first-run flow around.',
             width: 'half',
             query: trends({
               series: [{ event: save ?? pageView, math: 'avg_count_per_actor' }],

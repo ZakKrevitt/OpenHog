@@ -26,7 +26,7 @@ export const saasPack: Pack = {
     return compact([
       dashboard({
         key: 'saas-revenue',
-        name: 'SaaS — trial, conversion & churn',
+        name: 'SaaS - trial, conversion & churn',
         description:
           'The money path. Every tile here is about whether an account becomes, stays, or stops being a paying one.',
         question: 'Are trials turning into subscriptions, and are subscriptions surviving?',
@@ -46,7 +46,7 @@ export const saasPack: Pack = {
             name: 'Cancellations',
             description: 'Subscriptions ended in the last 7 days.',
             interpretation:
-              'Sustained above new subscriptions means you are shrinking. Before rebuilding the product, check whether cancellations cluster at a specific tenure — a spike at month 2 is an onboarding failure surfacing late.',
+              'Sustained above new subscriptions means you are shrinking. Before rebuilding the product, check whether cancellations cluster at a specific tenure - a spike at month 2 is an onboarding failure surfacing late.',
             width: 'third',
             query: bigNumber({ event: cancel ?? pageView, math: 'total' }, '-7d'),
             requires: [cancel],
@@ -82,7 +82,7 @@ export const saasPack: Pack = {
             name: 'Trials and conversions over time',
             description: 'Trials started and subscriptions started on the same axis.',
             interpretation:
-              'The gap between the lines, shifted by your trial length, is your conversion rate drawn over time. A widening gap means recent cohorts are converting worse — look at what shipped.',
+              'The gap between the lines, shifted by your trial length, is your conversion rate drawn over time. A widening gap means recent cohorts are converting worse - look at what shipped.',
             width: 'half',
             query: trends({
               series: [
@@ -137,7 +137,7 @@ export const saasPack: Pack = {
       }),
       dashboard({
         key: 'saas-adoption',
-        name: 'SaaS — feature adoption & expansion',
+        name: 'SaaS - feature adoption & expansion',
         description:
           'Which parts of the product get used, by whom, and whether accounts are growing into more of it over time.',
         question: 'Is the product getting deeper for the accounts that stay?',
@@ -147,7 +147,7 @@ export const saasPack: Pack = {
             name: 'Feature adoption',
             description: 'Each event, with how many people used it and what share of active people that is.',
             interpretation:
-              'Anything under about 5% of active people is either undiscoverable or unwanted. Decide which, then either surface it or delete it — carrying it costs you on every release.',
+              'Anything under about 5% of active people is either undiscoverable or unwanted. Decide which, then either surface it or delete it - carrying it costs you on every release.',
             width: 'full',
             query: hogql(sql`
               SELECT

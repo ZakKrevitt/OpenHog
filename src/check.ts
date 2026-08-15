@@ -1,5 +1,5 @@
 /**
- * Drift detection — `openhog check`.
+ * Drift detection - `openhog check`.
  *
  * Instrumentation rots the way documentation rots, except silently: a refactor
  * drops a call site and the chart keeps drawing a plausible line at a lower

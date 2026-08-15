@@ -47,7 +47,7 @@ export const VITE_CONSUMER_APP: Record<string, string> = {
   ),
   'README.md': '# Lantern\n\nLantern helps you find live music near you, tonight.\n\n## Install\n\nnpm install\n',
   'index.html':
-    '<html><head><title>Lantern — live music near you</title><meta name="description" content="Find gigs tonight"></head><body></body></html>',
+    '<html><head><title>Lantern - live music near you</title><meta name="description" content="Find gigs tonight"></head><body></body></html>',
   'src/main.tsx': 'import "./app"\n',
   'src/analytics.ts': `
 export const ANALYTICS_EVENT_NAMES = [
@@ -153,7 +153,7 @@ export function report() {
 `,
 }
 
-/** A repo with no analytics at all — the cold-start case. */
+/** A repo with no analytics at all - the cold-start case. */
 export const BARE_APP: Record<string, string> = {
   'package.json': JSON.stringify({ name: 'my-app', dependencies: { react: '^18.0.0' } }, null, 2),
   'README.md': '# React + TypeScript + Vite\n\nThis template provides a minimal setup.\n',

@@ -51,7 +51,7 @@ describe('the CSP check', () => {
   it('catches the asset host missing from script-src', () => {
     // The fixture allows us.i.posthog.com in connect-src only. Events flow, the
     // replay recorder can never load, and $recording_status sticks at
-    // lazy_loading — the exact production-only failure this check exists for.
+    // lazy_loading - the exact production-only failure this check exists for.
     const context: DoctorContext = {
       root: fixture.root,
       config,

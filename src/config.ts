@@ -83,7 +83,7 @@ export function buildConfig(options: BuildConfigOptions): OpenHogConfig {
 /**
  * The env var the browser SDK reads. Frameworks disagree about which prefix is
  * exposed to client code, and picking the wrong one produces a key that is
- * `undefined` at runtime with no error anywhere — which is indistinguishable
+ * `undefined` at runtime with no error anywhere - which is indistinguishable
  * from "analytics is broken".
  */
 export function publicKeyEnvFor(frameworks: string[]): string {

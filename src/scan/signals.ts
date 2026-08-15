@@ -18,7 +18,7 @@ type SignalKey = keyof ScanResult['signals']
  *
  * `minHits` exists because some vocabularies are generic enough to appear in
  * any codebase. "listing", "supply" and "host" turned a nightlife app into a
- * marketplace, which then picked the wrong dashboard pack — so the signals with
+ * marketplace, which then picked the wrong dashboard pack - so the signals with
  * broad wording need real weight of evidence, not two incidental mentions.
  */
 const SIGNALS: Record<SignalKey, { deps: RegExp; source: RegExp; minHits?: number }> = {

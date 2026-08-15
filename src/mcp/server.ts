@@ -1,5 +1,5 @@
 /**
- * `openhog mcp` — an MCP server over stdio, with no SDK dependency.
+ * `openhog mcp` - an MCP server over stdio, with no SDK dependency.
  *
  * The point is not "AI integration" as a feature. It is that the loop of asking
  * a question about your product, writing the query, reading the answer and
@@ -21,6 +21,8 @@ import { runDoctor } from '../doctor/index.js'
 import { PostHogClient, hostsForRegion } from '../posthog/client.js'
 import { resolvePersonalKey } from '../posthog/auth.js'
 import { planStats } from '../plan/generate.js'
+import { computeMetrics } from '../metrics/compute.js'
+import { deriveFindings, healthScore, summarise } from '../insights/findings.js'
 
 interface JsonRpcRequest {
   jsonrpc: '2.0'
@@ -30,6 +32,21 @@ interface JsonRpcRequest {
 }
 
 const TOOLS = [
+  {
+    name: 'explain_product',
+    description:
+      'Read the PostHog project and return a ranked list of what is wrong with the product and what to do about it: retention, activation, funnel losses, friction, blind spots, and whether the instrumentation itself is trustworthy. Each finding carries the number, how it compares to typical for this kind of product, and one concrete next action. Use this whenever the user asks how the product is doing, what to work on next, why growth is flat, or what the analytics say.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        kind: {
+          type: 'string',
+          description: 'Override the inferred product type, which decides which benchmarks apply.',
+          enum: ['saas', 'consumer', 'marketplace', 'ecommerce', 'ai-app', 'devtool', 'content'],
+        },
+      },
+    },
+  },
   {
     name: 'get_tracking_plan',
     description:
@@ -117,6 +134,34 @@ export async function runMcp(argv: Argv): Promise<number> {
 
   const callTool = async (name: string, args: Record<string, unknown>): Promise<unknown> => {
     switch (name) {
+      case 'explain_product': {
+        const { client, projectId } = await getClient()
+        const plan = loadPlan(root, config)
+        let projectName = `Project ${projectId}`
+        try {
+          projectName = (await client.getProject(projectId)).name
+        } catch {
+          // project:read may be absent; the id is enough.
+        }
+        const set = await computeMetrics({
+          client,
+          projectId,
+          projectName,
+          productKind:
+            (typeof args.kind === 'string' ? (args.kind as never) : undefined) ??
+            plan?.product.kind ??
+            config?.product.kind,
+          roles: plan?.roles,
+        })
+        const findings = deriveFindings(set)
+        return {
+          score: healthScore(findings, set),
+          headline: summarise(findings),
+          context: set.context,
+          findings,
+          metrics: set.values,
+        }
+      }
       case 'get_tracking_plan': {
         const plan = loadPlan(root, config)
         if (!plan) return { error: 'No tracking plan. Run `openhog init` in this repository.' }

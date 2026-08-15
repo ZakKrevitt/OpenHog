@@ -14,7 +14,7 @@ a walkthrough explaining what each chart means.
 | They want | Do this |
 |---|---|
 | Analytics set up from scratch | [Full setup](#full-setup) |
-| To know why nothing is arriving | [Diagnose](#diagnose) — run this before reading any code |
+| To know why nothing is arriving | [Diagnose](#diagnose) - run this before reading any code |
 | To add one event | [Add an event](#add-an-event) |
 | An answer about real usage | [Query](#query-the-data) via the MCP tools |
 | Dashboards rebuilt after changes | `npx openhog sync` |
@@ -52,7 +52,7 @@ Then, in order of preference:
 
 **a. If you have browser control** (`mcp__claude-in-chrome__*` or the Browser
 pane) and the user agrees: navigate to the settings page from those instructions
-and walk them through creating the key on screen. Point at the scopes to tick —
+and walk them through creating the key on screen. Point at the scopes to tick -
 `project:read`, `insight:write`, `dashboard:write`, `query:read`.
 
 **Never read, transcribe, screenshot, or store the key value itself.** Navigate
@@ -96,7 +96,7 @@ Three things in the output need your attention:
 
 If OpenHog wrote one, it prints a framework-specific snippet. Apply it to the
 app entry point yourself. If the repo already had an analytics module, OpenHog
-leaves it alone — run the diagnosis below against it instead.
+leaves it alone - run the diagnosis below against it instead.
 
 ### 5. Tell the user what they have
 
@@ -131,7 +131,7 @@ The four traps it looks for, all production-only:
    the SDK is imported dynamically.
 
 Fix what it reports, then re-run. Do not conclude a client-side fix failed until
-the service worker has been unregistered and the caches cleared — it serves the
+the service worker has been unregistered and the caches cleared - it serves the
 old bundle after a deploy.
 
 ---
@@ -150,7 +150,7 @@ Then:
 1. Add the name to `EVENT_NAMES` in the analytics module (between the
    `openhog:events` markers). The type is derived from that array, so a typo at
    a call site becomes a compile error.
-2. Call `track(name, properties)` at the point the thing actually happened —
+2. Call `track(name, properties)` at the point the thing actually happened -
    after the server confirms, not on button click.
 3. **Bucket anything unbounded.** `price_bucket: 'under_20'`, not
    `price: 19.99`. `query_length_bucket: 'medium'`, not the raw search text.
@@ -167,12 +167,12 @@ to the user.
 
 The `openhog` MCP server exposes these. Prefer them over guessing:
 
-- `get_tracking_plan` — what this product measures and what each event means.
+- `get_tracking_plan` - what this product measures and what each event means.
   **Read this before writing any analytics code.**
-- `query_analytics` — run HogQL against the `events` table. Always bound the
+- `query_analytics` - run HogQL against the `events` table. Always bound the
   time range. The API applies a 100-row default limit unless you pass `LIMIT`.
-- `check_instrumentation_drift` — run after any refactor that touched analytics.
-- `diagnose_analytics` — the doctor, structured.
+- `check_instrumentation_drift` - run after any refactor that touched analytics.
+- `diagnose_analytics` - the doctor, structured.
 - `list_dashboards`, `get_event_definitions`.
 
 Useful HogQL shapes:

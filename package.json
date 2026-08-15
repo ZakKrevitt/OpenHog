@@ -1,16 +1,20 @@
 {
   "name": "openhog",
   "version": "0.1.0",
-  "description": "Read your codebase, instrument it, and build PostHog dashboards that are actually about your product. One command.",
+  "description": "Make your PostHog data actionable, understandable, and dead simple to use. Reads your project and tells you what to do about it.",
   "keywords": [
     "posthog",
     "analytics",
     "product-analytics",
+    "retention",
+    "activation",
+    "metrics",
+    "insights",
     "tracking-plan",
     "dashboards",
     "instrumentation",
-    "observability",
-    "mcp"
+    "mcp",
+    "cli"
   ],
   "homepage": "https://github.com/ZakKrevitt/OpenHog#readme",
   "bugs": "https://github.com/ZakKrevitt/OpenHog/issues",

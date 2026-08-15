@@ -5,8 +5,8 @@
  * production failure that no test and no local run could have caught. In order:
  *
  *   1. `$pageview` is sent by hand. posthog-js's `history_change` mode captures
- *      on history changes only, so a full page load — every direct visit and
- *      every reload — sent `$pageleave` with no matching `$pageview`, and Web
+ *      on history changes only, so a full page load - every direct visit and
+ *      every reload - sent `$pageleave` with no matching `$pageview`, and Web
  *      Analytics read zero while events flowed normally.
  *   2. URL sanitisation keeps the origin. Rewriting `$current_url` down to a
  *      bare path strips the ids, and also strips the domain Web Analytics parses
@@ -14,7 +14,7 @@
  *   3. Replay catches up to the landing route after the SDK loads. The dynamic
  *      import means the first route effect runs while the instance is still
  *      null, so recording only ever started on the first in-app navigation, and
- *      land-look-leave sessions — the ones most worth watching — were exactly
+ *      land-look-leave sessions - the ones most worth watching - were exactly
  *      the ones never recorded.
  *   4. Events fired before init are queued, bounded. Boot-time events are the
  *      ones a funnel most needs and the ones most likely to be dropped.
@@ -165,7 +165,7 @@ function normalizeUrlProperty(value: unknown): string | null {
     const url = new URL(value, RELATIVE_BASE)
     const route = normalizeRoute(url.pathname)
     // Keep the origin on absolute URLs. Web Analytics reads $current_url to
-    // attribute a visit to a domain, and a bare path attributes to nothing —
+    // attribute a visit to a domain, and a bare path attributes to nothing -
     // which reads as zero visitors while events flow normally. The origin was
     // never the sensitive part: the ids in the path and the query string are,
     // and both are still rewritten away here.
@@ -213,8 +213,8 @@ export function buildConfig(host: string, sessionRecording: boolean): Partial<Po
     disable_web_experiments: true,
     disable_surveys: true,
     // $pageview is sent by hand from syncRoute(). The SDK's 'history_change'
-    // mode captures on history changes only, so a full page load — every direct
-    // visit and every reload — produced $pageleave with no matching $pageview,
+    // mode captures on history changes only, so a full page load - every direct
+    // visit and every reload - produced $pageleave with no matching $pageview,
     // and Web Analytics read zero.
     capture_pageview: false,
     // Left to the SDK: bounce rate and session duration need it, and it has to
@@ -288,7 +288,7 @@ export function initAnalytics(options: { distinctId?: string | null } = {}): Pro
       // The route effect already ran for the landing route while this import
       // was in flight and \`client\` was null. Without this catch-up, replay only
       // ever begins on the first in-app navigation, so land-look-leave sessions
-      // are exactly the ones never recorded — and the landing $pageview is lost.
+      // are exactly the ones never recorded - and the landing $pageview is lost.
       if (typeof window !== 'undefined') syncRoute(window.location.pathname)
     })
     .catch(() => {

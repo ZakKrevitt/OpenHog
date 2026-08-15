@@ -12,7 +12,7 @@ dashboards.
 **Packs are written against roles, not event names.**
 
 Your app emits `account_created`. The next person's emits `user_registered`. A pack
-written against a literal name is therefore wrong for almost everybody — which is
+written against a literal name is therefore wrong for almost everybody - which is
 exactly why hosted setup wizards produce dashboards full of empty tiles.
 
 So you ask for a *role* and OpenHog hands you whatever this codebase calls it:
@@ -25,7 +25,7 @@ If it returns `null`, every tile that needed it is dropped and the walkthrough t
 the user which chart they'd unlock by adding that event. You don't handle that; the
 helpers do.
 
-[The full role list](../src/plan/roles.ts) — 32 of them, each with the vocabulary it
+[The full role list](../src/plan/roles.ts) - 32 of them, each with the vocabulary it
 matches.
 
 ---
@@ -52,7 +52,7 @@ export const fitnessPack: Pack = {
     return compact([
       dashboard({
         key: 'fitness-habit',
-        name: 'Fitness — habit formation',
+        name: 'Fitness - habit formation',
         description: 'Whether people are building a routine or trying it once.',
         question: 'Do people come back for a second workout?',
         tiles: [
@@ -62,7 +62,7 @@ export const fitnessPack: Pack = {
             description: 'How many people who complete one ever complete another.',
             interpretation:
               'The single number that predicts everything else in a fitness product. ' +
-              'Under about 40% means the first session is not producing a reason to return — ' +
+              'Under about 40% means the first session is not producing a reason to return - ' +
               'that is a programming problem, not a notifications problem.',
             requires: [workout],
             width: 'half',
@@ -79,7 +79,7 @@ export const fitnessPack: Pack = {
             description: 'Distribution of consecutive active days per person.',
             interpretation:
               'The streak length where the histogram falls off a cliff is where your ' +
-              'reminder should fire — one day before it, not after.',
+              'reminder should fire - one day before it, not after.',
             requires: [workout],
             width: 'half',
             query: hogql(sql`
@@ -116,7 +116,7 @@ That's the whole contribution.
 | | |
 |---|---|
 | `role(plan, 'save')` | the event this repo uses for a role, or `null` |
-| `firstRole(plan, 'purchase', 'checkout_started')` | first role that resolves — "purchase, or failing that, checkout" |
+| `firstRole(plan, 'purchase', 'checkout_started')` | first role that resolves - "purchase, or failing that, checkout" |
 | `hasRoles(plan, 'share', 'invite_sent')` | all of them resolve? |
 | `tile({...})` | build a tile; returns `null` if any `requires` entry is `null` |
 | `dashboard({...})` | assemble surviving tiles; returns `null` below `minTiles` (default 2) |
@@ -159,7 +159,7 @@ requires: [workout, signup],   // a null here removes the tile. that is correct.
 ```
 
 A tile that charts an event nothing emits is the failure this whole project exists to
-prevent. `requires` is how that's enforced — don't route around it.
+prevent. `requires` is how that's enforced - don't route around it.
 
 ### 3. Widths and heights
 
@@ -172,11 +172,11 @@ type; you don't set it.
 Every tile's query is executed against the user's project before it's created, so a
 bad query is reported and skipped rather than shipped. That's a safety net, not a
 licence: self-hosted PostHog can lag Cloud on HogQL functions. Prefer a builder where
-one exists, and reach for `hogql()` when the question is genuinely a query — "which
+one exists, and reach for `hogql()` when the question is genuinely a query - "which
 properties have runaway cardinality", "who has gone quiet".
 
 Columns available on `events`: `event`, `timestamp`, `distinct_id`, `properties` (a
-JSON map — `properties.$pathname`), `$session_id`, `person_id`.
+JSON map - `properties.$pathname`), `$session_id`, `person_id`.
 
 ---
 
@@ -218,10 +218,10 @@ workout_completed: {
 },
 ```
 
-- `include` — precise patterns. Anchored ones (`^…$`) get a bonus.
-- `weak` — patterns too loose to beat a precise match, but better than nothing.
+- `include` - precise patterns. Anchored ones (`^…$`) get a bonus.
+- `weak` - patterns too loose to beat a precise match, but better than nothing.
   `_click$` belongs here.
-- `exclude` — kills the match outright. Always exclude `started` from a `completed`
+- `exclude` - kills the match outright. Always exclude `started` from a `completed`
   role and vice versa.
 
 Add a case to `tests/roles.test.ts` showing three real-world spellings resolving, and

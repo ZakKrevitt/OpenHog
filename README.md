@@ -2,271 +2,230 @@
 
 # 🦔 OpenHog
 
-**Point it at your repo. Get PostHog dashboards that are actually about your product.**
+**Make your PostHog data actionable, understandable, and dead simple to use.**
 
 ```bash
-npx openhog init
+npx openhog explain
 ```
 
-*Reads your code · writes a tracking plan · hardens your instrumentation · builds the dashboards · explains what every chart means*
+*No repo. No config. No code changes. Just your PostHog key and thirty seconds.*
 
-[![npm](https://img.shields.io/npm/v/openhog?color=%23f54e00)](https://www.npmjs.com/package/openhog)
-[![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
-[![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](./package.json)
+[![npm](https://img.shields.io/npm/v/openhog?color=%23C4F236&labelColor=0D0D0D)](https://www.npmjs.com/package/openhog)
+[![license](https://img.shields.io/badge/license-MIT-0D0D0D)](./LICENSE)
+[![zero dependencies](https://img.shields.io/badge/dependencies-0-C4F236?labelColor=0D0D0D)](./package.json)
+
+**Built by [Dizko Labs](https://www.dizko.app).** Dizko uses real-world intelligence to help you
+discover events and coordinate going to them with your friends.
 
 </div>
 
 ---
 
-## The problem
+## The problem isn't collecting the data
 
-You install PostHog. You get an empty project and a blank dashboard canvas.
+You've been sending events for a year. You have dashboards. You open them, look at some lines going up and to the right, feel vaguely fine, and close the tab.
 
-So you click through the setup wizard, and it makes you a dashboard built on `user_signed_up`, `event_saved` and `account_registered` — none of which your app emits, because your app calls them `signup_complete`, `save_toggle` and `user_created`.
+Nobody ever tells you that your week-1 retention is bad **for your kind of product**. Or that 78% of the people who signed up last month never did the thing your product is for. Or that two of your events silently stopped arriving three weeks ago and four of your charts have been lying since.
 
-Six empty charts. You conclude the tool is broken, close the tab, and six months later you are still guessing.
-
-**OpenHog reads your codebase first.** Every chart it builds references an event your code actually sends, verified by static analysis and then validated against your project's own query API before it is created.
+**OpenHog reads your PostHog project and tells you what to do about it.**
 
 ---
 
-## What one command does
+## What you get
+
+```
+  Lantern · consumer
+  18k people · 968k events · 214 days of history · 11 event types
+
+  30/100 product health
+  5 critical · 5 worth fixing · 1 blind spot
+
+  ● CRITICAL
+  1. Only 8.9% of people come back after a week
+
+     Of the 2400 people who first appeared 2 to 8 weeks ago, 214 were still
+     active a week later.
+
+     That is well below what is typical for a consumer app. A product people
+     return to unprompted keeps a meaningful share of a cohort past the first
+     week. Retention is the multiplier on everything else you do: at this
+     level, most of what you spend on acquisition is refilling a bucket that
+     empties, and no channel optimisation will change that.
+
+     → Do this:
+       Stop working on acquisition and go and watch ten session replays of
+       people who never returned. Look for the moment they hesitate on their
+       first visit.
+
+     Week-1 retention           8.9%   (typical: 15% to 45%)
+     Week-4 retention           2.2%   (typical: 8% to 30%)
+     People who never came back  76%   (typical: under 82%)
+
+  ● CRITICAL
+  2. 2 events have stopped arriving
+
+     PostHog saw these regularly between 8 and 30 days ago and hasn't seen
+     them at all in the last 7 days: save_toggle, share_click.
+
+     Any number in this report that depends on one of these is currently wrong.
+     ...
+```
+
+Every finding carries **the number**, **how it compares to typical for your kind of product**, and **one concrete next action**. Not "consider improving onboarding." The specific thing to open tomorrow morning.
+
+---
+
+## It works on the events you already have
+
+You don't name your events the way a tool expects. Nobody does.
+
+OpenHog resolves **roles** against whatever your project actually sends, weighted by volume so a leftover experiment event never beats the real one:
+
+```
+signup_completed   → account_created       (yours)
+activation         → list_created          (yours, used as the core action)
+content_opened     → gig_detail_opened     (yours)
+error              → error_shown           (yours)
+```
+
+Got one wrong? `--role activation=your_event` and every number that used it is corrected.
+
+---
+
+## The shareable report
+
+Every run writes `openhog-report.html`: one file, no network calls, light and dark, prints cleanly. Send it to a cofounder or an investor without explaining anything first.
+
+<div align="center">
+<img src="docs/report-preview.png" width="760" alt="A product health report: a 30/100 score in an acid green block, a tally of 5 critical and 5 worth-fixing findings, then the top finding - only 8.9% of people come back after a week - with the number, how it compares to typical for a consumer app, and a concrete next action">
+</div>
+
+It's built in the [Dizko](https://www.dizko.app) house style: grey canvas, ink black, acid green,
+Instrument Sans. Fonts are embedded, so it renders identically offline, in five years, behind any CSP.
+
+---
+
+## What it looks for
+
+**Whether people stay** - week-1 and week-4 retention, whether the curve flattens or collapses, stickiness, power users, and the share of people who showed up once and never returned.
+
+**Where they fall out** - visit to signup, signup to activation, activation to paid, and how long reaching value takes.
+
+**What's going wrong** - how many *people* saw an error (not how many errors fired), and how concentrated your acquisition is.
+
+**Whether you can trust any of it** - events that stopped arriving, properties quietly exploding in cardinality, and the `$pageview`/`$pageleave` divergence that means your SDK is missing the first page load of every session.
+
+**What you can't see at all** - "nothing here looks like an activation event, so you cannot tell where new people are getting stuck." Blind spots are findings too, and usually the most actionable ones.
+
+### Two rules it never breaks
+
+**No claim without a sample.** A metric computed off eleven people is reported as low confidence and never raises a finding. Telling you your retention is bad off a tiny cohort is worse than saying nothing, because it's wrong *and* it teaches you to distrust the rest.
+
+**Never confuses "zero" with "not measured."** If you don't send a signup event, you get "you cannot currently see how many visitors become users," not "your signup rate is 0%."
+
+### About the benchmarks
+
+The "typical" ranges are **rules of thumb**, drawn from widely repeated industry guidance and adjusted per product type. They are **not** measured from a dataset of comparable products, and a healthy product can sit outside any of them. Every finding says which band it used and why, so you can disagree with it in an informed way. They're there because approximately-right context beats a bare number with none.
+
+Better numbers for a vertical are [a very welcome PR](./CONTRIBUTING.md).
+
+---
+
+## The other half: fixing the instrumentation
+
+If the report says your data can't be trusted, OpenHog fixes that too.
 
 ```bash
-npx openhog init
+npx openhog doctor    # why is nothing arriving?
+npx openhog init      # read the codebase, instrument it, build the dashboards
+npx openhog check     # has the code drifted from the plan? exits 1. good in a hook
 ```
 
-1. **Reads your product.** README, package description, meta tags, landing-page headlines, routes, dependencies, existing analytics call sites. It works out what you've built and what kind of thing it is.
-2. **Walks you through a PostHog key.** Opens the right page, names the exact four scopes, takes the paste without echoing it, proves it works, and stores it outside your repo at `0600`.
-3. **Writes a tracking plan** — `openhog/tracking-plan.json`. Every event you already emit, with where it fires. Plus the ones worth adding, each with a suggested location, and *only* for features your code actually has.
-4. **Writes a hardened analytics module** (if you want one) with five production traps already closed. See [the traps](#four-failures-that-only-appear-in-production).
-5. **Builds the dashboards.** Six core ones plus a pack for your product type. Every tile's query is run against your project before it is created, so a tile that can't work is reported, not shipped.
-6. **Writes `ANALYTICS.md`** — what each chart means, what to do when it moves, and what's missing from the picture and why.
+### `openhog doctor`
 
----
+The "why is my PostHog empty" fixer. Checks CSP directives, env vars, SDK config, project settings, and does a live ingest round-trip that distinguishes "my code is wrong" from "my key is wrong."
 
-## Not "an event exists somewhere" — *your* event
-
-Dashboard packs are written against **roles**, not literal names. OpenHog resolves each role against your codebase:
-
-```
-signup_completed         → account_created        (yours)
-content_opened           → event_detail_opened    (yours)
-search                   → search_submit          (yours)
-share                    → share_click            (yours)
-checkout_started         → ticketing_checkout_started
-```
-
-A role that resolves to nothing means every tile needing it is **skipped**, and `ANALYTICS.md` tells you which charts you'd unlock by adding it. A smaller honest dashboard beats a bigger one that's lying.
-
-Got a mapping wrong? Fix that one line in the tracking plan and re-run `openhog sync`. Every chart that used it is corrected.
-
----
-
-## `openhog doctor` — why is nothing arriving?
-
-The command you'll actually share with people.
-
-```bash
-npx openhog doctor
-```
-
-```
-✓ Project key            VITE_PUBLIC_POSTHOG_KEY found in .env.local
-✗ Content-Security-Policy
-    vercel.json: script-src is missing https://us-assets.i.posthog.com — events
-    will flow but session replay can never load its recorder.
-    fix: Dev serves no CSP header, so this failure only ever appears in production.
-✗ Pageview capture
-    capture_pageview is set to 'history_change', which skips the first page load.
-    fix: Every direct visit and every reload sends $pageleave with no matching
-    $pageview and Web Analytics reads near zero.
-! Ad-blocker exposure
-    Events go directly to us.i.posthog.com, which most ad blockers block.
-    fix: Typically 15-30% of traffic never reports — and it is not a random
-    15-30%. Serve PostHog through a reverse proxy on your own domain.
-✓ Project timezone       Europe/Berlin
-✓ Live round-trip        Test event arrived in 6s. Ingestion works end to end.
-```
-
-It sends a real event through the public ingest endpoint and polls until it comes back out of the query API — the check that tells "my code is wrong" apart from "my key is wrong."
-
----
-
-## Four failures that only appear in production
-
-Every one of these has shipped silently in a real product. Dev serves no CSP, unit tests never fetch a third-party asset, and CI has no ad blocker — so all four are green locally and broken live. The generated module closes all of them; `openhog doctor` checks them.
+It knows the four failures that are green in dev, green in CI, and broken in production:
 
 | | The trap |
 |---|---|
-| **1** | **CSP directives are separate allowlists.** A host reachable under `connect-src` is *not* thereby loadable as a script. PostHog's asset host serves the replay recorder as a script. Miss it in `script-src` and events flow forever while `$recording_status` sits at `lazy_loading` and you get zero recordings. |
-| **2** | **`capture_pageview: 'history_change'` skips the first load.** It captures on history changes only, so a full page load sends `$pageleave` with no matching `$pageview`. Every direct visit and every reload goes uncounted, and Web Analytics reads near zero. |
-| **3** | **Sanitising `$current_url` to a bare path breaks Web Analytics.** It parses that field to attribute a visit to a domain, so stripping the origin attributes every visit to nothing. Strip the ids and query string; keep the origin. |
-| **4** | **Replay starts on the first navigation, not on landing.** The SDK is imported dynamically, so the first route effect runs before the instance exists. Land-look-leave sessions — the ones most worth watching — are exactly the ones never recorded. |
+| **1** | **CSP directives are separate allowlists.** A host in `connect-src` is *not* thereby loadable as a script. PostHog's asset host serves the replay recorder as a script. Miss it in `script-src` and events flow forever while replay records nothing. |
+| **2** | **`capture_pageview: 'history_change'` skips the first page load.** Every direct visit and reload sends `$pageleave` with no `$pageview`. Web Analytics reads near zero. |
+| **3** | **Sanitising `$current_url` to a bare path breaks Web Analytics.** It parses that field to attribute a visit to a domain. Strip the ids, keep the origin. |
+| **4** | **Replay starts on the first navigation, not on landing.** The SDK is imported dynamically, so land-look-leave sessions are exactly the ones never recorded. |
 
-Full write-up in [docs/TRAPS.md](./docs/TRAPS.md).
+Full write-up: [docs/TRAPS.md](./docs/TRAPS.md).
 
----
+### `openhog init`
 
-## The dashboards
+Reads your codebase, writes a tracking plan, emits a hardened analytics module with all four traps closed, and builds dashboards where **every tile references an event your code actually emits** - verified by static analysis, then validated against your project's query API before it's created.
 
-Six for everyone, plus a pack for what you've built.
-
-| | Answers |
-|---|---|
-| **1. North Star** | Are we growing, and do the people we get stick around? |
-| **2. Acquisition** | Which channels send people who actually stay? |
-| **3. The critical path** | Where exactly do people fall out, and who falls out hardest? |
-| **4. Engagement** | What is this product being used for, really? |
-| **5. Friction & health** | What is going wrong, for whom, and where? |
-| **6. Instrumentation health** | **Can I trust the other five?** |
-
-That last one is the dashboard nobody builds. It watches for planned events that stopped arriving, properties quietly exploding in cardinality, surfaces that went silent, and `$pageview`/`$pageleave` divergence. Analytics rots the way documentation rots, except the chart keeps drawing a plausible line.
-
-Then, by product type:
-
-**SaaS** trial→paid, churn warning list, feature adoption, expansion · **Consumer** viral loops, k-factor, habit formation, session depth · **Marketplace** liquidity, zero-result searches, supply/demand balance · **Ecommerce** cart funnel, abandonment by device, repeat rate · **AI app** generation volume, keep-rate as a quality proxy, cost per user, retention after first generation · **Dev tool** time-to-first-success, docs behaviour, the people who signed up and never got it working · **Content** reading depth, return readers, reader→subscriber
-
-Every tile carries a plain-English "how to read it" that ships into PostHog's own description field *and* into `ANALYTICS.md`:
-
-> **New-person retention** — Read the first column down, not across. If week 1 is under ~20% for a consumer product or ~40% for a tool people pay for, fixing retention beats every other project you could pick.
+Six core dashboards plus a pack for your product type, and an `ANALYTICS.md` explaining what every chart means. [docs/DASHBOARDS.md](./docs/DASHBOARDS.md).
 
 ---
 
-## The rest of the commands
-
-```bash
-npx openhog doctor     # why is nothing arriving?
-npx openhog check      # has the code drifted from the plan? exits 1. good in a hook
-npx openhog sync       # rebuild dashboards after editing the plan
-npx openhog demo       # seed realistic synthetic data so the dashboards aren't empty
-npx openhog plan       # print the tracking plan as a readable summary
-npx openhog mcp        # MCP server: let your AI agent query your analytics
-```
-
-### `openhog check` — catch instrumentation drift in review
-
-No network, no API key, sub-second on a large repo:
-
-```bash
-npx openhog check --strict
-```
-
-```
-✗ Events the plan expects that the code no longer emits (1)
-    share_click
-      The plan says this is emitted, but no call site was found. Previously at
-      src/components/Share.tsx:34. Any dashboard tile using it is now drawing a
-      flat line.
-
-✗ Dashboard roles that no longer resolve (1)
-    share
-      No event resolves to the "share" role any more. Every dashboard tile built
-      on it will disappear on the next sync.
-```
-
-Drop it in `.husky/pre-push` and a refactor can never silently kill a chart again.
-
-### `openhog demo` — dashboards that aren't empty
-
-Synthetic data with the properties real data has and fake data usually doesn't: a funnel that loses people at every step, retention that decays *to a floor* rather than to zero, weekly seasonality, and channels whose conversion rates genuinely differ.
-
-```bash
-npx openhog demo --people 800 --days 90
-```
-
-Everything is tagged `is_demo_data: true` with `openhog_demo_*` person ids. Use a scratch project.
-
-### `openhog mcp` — your agent can read the analytics it just set up
+## For agents
 
 ```jsonc
 // .mcp.json
-{ "mcpServers": { "openhog": { "command": "npx", "args": ["openhog", "mcp"] } } }
+{ "mcpServers": { "openhog": { "command": "npx", "args": ["-y", "openhog", "mcp"] } } }
 ```
 
-Then your agent can ask *"what happened to signups after Tuesday's deploy?"*, run HogQL, check for instrumentation drift after a refactor, and read the tracking plan before adding a new event so it matches your vocabulary instead of inventing a synonym.
+`explain_product` gives your agent the ranked findings. `query_analytics` runs HogQL. `get_tracking_plan` lets it match your event vocabulary instead of inventing a synonym. `check_instrumentation_drift` catches what a refactor broke.
 
-There's also a **Claude Code plugin** in [`plugin/`](./plugin) — `/openhog` in your agent, including a browser-assisted walkthrough for getting the API key.
-
----
-
-## Privacy by default
-
-Analytics tools default to hoovering. This one doesn't.
-
-- **Autocapture is off.** Only events someone deliberately named are sent. A new button can't start reporting itself.
-- **URLs are normalised in the browser.** `/list/sh4r3c0d3` leaves as `/list/:shareCode`. Ids and share codes never become property values.
-- **`respect_dnt` is on.** Person profiles are created for identified users only.
-- **Session replay is off unless you turn it on**, and even then never runs on routes that show someone's own data — settings, billing, inbox, admin — detected from your route table and written into the generated module for you to review.
-- **The cardinality audit** catches the raw email or id that slipped into a property three sprints ago.
+There's a **Claude Code plugin** in [`plugin/`](./plugin) too, including a browser-assisted walkthrough for getting the API key (which the agent never reads or stores).
 
 ---
 
-## Ejectable by design
+## Privacy and trust
 
-Everything OpenHog writes is plain code and plain JSON that you own:
-
-- `openhog/tracking-plan.json` — diffable, reviewable in a PR, hand-editable
-- `src/analytics.ts` — a normal module with no dependency on OpenHog
-- `ANALYTICS.md` — normal markdown
-- Your dashboards live in *your* PostHog project
-
-Delete OpenHog and nothing stops working. **It never overwrites an analytics module you already wrote** — it says so and leaves it alone.
-
-**Zero runtime dependencies.** `npx openhog` installs in about a second, and you can audit the whole thing in an afternoon. A tool that asks for an API key should be that auditable.
+- **Nothing leaves your machine** except queries to your own PostHog. No telemetry, ever.
+- **Zero runtime dependencies.** `npx openhog` installs in about a second and you can audit the whole thing in an afternoon. A tool that asks for an API key should be that auditable.
+- **Your key stays yours.** Stored at `~/.openhog/credentials.json`, mode `0600`, outside the repo, and only ever sent as an `Authorization` header.
+- **The generated instrumentation is conservative**: autocapture off, URLs normalised in the browser, `respect_dnt` on, and replay never running on routes that show someone's own data.
+- **Ejectable.** Plain code, plain JSON, your dashboards in your project. Delete OpenHog and nothing stops working. It never overwrites an analytics module you already wrote.
 
 ---
 
 ## Install
 
 ```bash
-npx openhog init          # no install needed
-npm i -D openhog          # or keep it around for `check` in a hook
+npx openhog explain       # nothing to install
+npm i -D openhog          # or keep it for `check` in a hook
 ```
 
-Node ≥ 20.11. Works with PostHog Cloud US, Cloud EU, and self-hosted (`--host https://posthog.internal`).
+Node ≥ 20.11. PostHog Cloud US, Cloud EU, or self-hosted (`--host https://posthog.internal`).
 
-**Frameworks:** Next.js (app + pages), React/Vite, Vue, Nuxt, Svelte/SvelteKit, Astro, Remix, Solid, Angular, React Native/Expo, plus Django, FastAPI, Flask, Rails, Express and Swift/Kotlin surfaces for detection.
+You'll need a personal API key with `project:read`, `insight:write`, `dashboard:write`, `query:read`. `openhog auth` walks you through it: opens the right page, names the scopes, takes the paste without echoing it, and proves it works before saving.
 
 ---
 
 ## Contributing
 
-The highest-leverage contribution is a **dashboard pack** for a vertical you know better than we do. It's one file:
+The highest-leverage contributions:
 
-```ts
-export const fitnessPack: Pack = {
-  id: 'fitness',
-  appliesTo: ['consumer'],
-  build: (plan) => compact([
-    dashboard({
-      key: 'streaks',
-      question: 'Are people building a habit?',
-      tiles: [
-        tile({
-          key: 'workout-streak',
-          name: 'Workout streaks',
-          description: 'Consecutive days with a completed workout.',
-          interpretation: 'The streak length where drop-off spikes is where your reminder should fire.',
-          requires: [role(plan, 'core_action')],
-          query: trends({ series: [{ event: role(plan, 'core_action')! }] }),
-        }),
-      ],
-    }),
-  ]),
-}
-```
+1. **A better benchmark for a vertical you know.** The ranges in [`src/insights/benchmarks.ts`](./src/insights/benchmarks.ts) are rules of thumb. If you have real numbers, they should replace mine.
+2. **A finding rule.** Spotted a pattern in your own data that would have saved you six months? That's ~30 lines in [`src/insights/findings.ts`](./src/insights/findings.ts).
+3. **A dashboard pack** for your vertical. One file. [docs/PACKS.md](./docs/PACKS.md).
+4. **A doctor check** for a production-only failure you've hit. [docs/TRAPS.md](./docs/TRAPS.md).
 
-Ask for roles, not event names, and it works on every codebase in that vertical. See [docs/PACKS.md](./docs/PACKS.md).
-
-Also wanted: more framework detectors, more analytics-library call patterns, and doctor checks for failures you've hit.
+[CONTRIBUTING.md](./CONTRIBUTING.md) · [ROADMAP.md](./ROADMAP.md)
 
 ---
 
 ## Prior art & thanks
 
-Built on lessons from instrumenting a real production app, where all four traps above were found the hard way — in production, weeks after shipping, with the charts confidently drawing the wrong number the whole time.
+Built from lessons instrumenting a real production app, where all four traps above were found the hard way: in production, weeks after shipping, with the charts confidently drawing the wrong number the whole time.
 
 PostHog is a genuinely good product. This is a third-party tool, not affiliated with PostHog Inc.
 
+---
+
+<div align="center">
+
+**[Dizko Labs](https://www.dizko.app)** builds tools for discovering what's happening around you
+and getting there with the people you like. OpenHog came out of instrumenting that.
+
 MIT © [Zak Krevitt](https://github.com/ZakKrevitt)
+
+</div>

@@ -1,5 +1,5 @@
 /**
- * `openhog sync` — rebuild the dashboards from the tracking plan.
+ * `openhog sync` - rebuild the dashboards from the tracking plan.
  *
  * Run after editing the plan, after adding events, or after pulling a new
  * version of OpenHog with better packs. Re-scans first, so newly instrumented

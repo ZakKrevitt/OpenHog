@@ -1,5 +1,5 @@
 /**
- * `openhog init` — the one command.
+ * `openhog init` - the one command.
  *
  * Scan, understand, plan, instrument, build, document. Every destructive step
  * asks first and every step can be skipped, because this runs against
@@ -38,7 +38,7 @@ export async function runInit(argv: Argv): Promise<number> {
   const root = rootFrom(argv)
 
   log.plain()
-  log.plain(`  ${color.bold('OpenHog')} ${color.grey('— analytics that match your product')}`)
+  log.plain(`  ${color.bold('OpenHog')} ${color.grey('- analytics that match your product')}`)
   log.plain()
 
   // -------------------------------------------------------------------------
@@ -89,7 +89,7 @@ export async function runInit(argv: Argv): Promise<number> {
       ))
 
   const packs = packsForKind(kind)
-  log.ok(`${kind} — using the ${packs.map((pack) => pack.name).join(' and ')} packs.`)
+  log.ok(`${kind} - using the ${packs.map((pack) => pack.name).join(' and ')} packs.`)
 
   // -------------------------------------------------------------------------
   // 3. Connect to PostHog
@@ -239,7 +239,7 @@ export async function runInit(argv: Argv): Promise<number> {
     })
     const walkthroughPath = join(root, config.paths?.walkthrough ?? DEFAULT_WALKTHROUGH_PATH)
     writeText(walkthroughPath, walkthrough)
-    log.ok(`Wrote ${color.cyan(config.paths?.walkthrough ?? DEFAULT_WALKTHROUGH_PATH)} — what every chart means and what to do when it moves.`)
+    log.ok(`Wrote ${color.cyan(config.paths?.walkthrough ?? DEFAULT_WALKTHROUGH_PATH)} - what every chart means and what to do when it moves.`)
 
     // ---------------------------------------------------------------------
     // 9. Demo data
@@ -265,7 +265,7 @@ export async function runInit(argv: Argv): Promise<number> {
   // 10. What next
   // -------------------------------------------------------------------------
   log.title('Done. Next:')
-  log.plain(`  ${color.bold('1.')} Read ${color.cyan(config.paths?.walkthrough ?? 'ANALYTICS.md')} — it explains every chart.`)
+  log.plain(`  ${color.bold('1.')} Read ${color.cyan(config.paths?.walkthrough ?? 'ANALYTICS.md')} - it explains every chart.`)
   log.plain(`  ${color.bold('2.')} Set ${color.bold(publicKeyEnv)} in your hosting provider's environment.`)
   log.plain(`  ${color.bold('3.')} Deploy, then run ${color.cyan('npx openhog doctor')} to prove events are arriving.`)
   if (stats.suggested > 0) {

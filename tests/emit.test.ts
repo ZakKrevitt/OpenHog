@@ -142,7 +142,7 @@ describe('the walkthrough', () => {
     dashboards: [
       {
         key: 'north-star',
-        name: '1. North Star — activation & retention',
+        name: '1. North Star - activation & retention',
         description: 'The daily check.',
         question: 'Are we growing?',
         tiles: [
@@ -162,13 +162,13 @@ describe('the walkthrough', () => {
     created: [
       {
         id: 7,
-        name: '1. North Star — activation & retention',
+        name: '1. North Star - activation & retention',
         url: 'https://us.posthog.com/project/1/dashboard/7',
         tiles: [],
         skipped: [],
       },
     ],
-    skipped: [{ dashboard: 'Consumer — viral loops', tile: 'Shares', reason: 'no share event' }],
+    skipped: [{ dashboard: 'Consumer - viral loops', tile: 'Shares', reason: 'no share event' }],
     projectUrl: 'https://us.posthog.com/project/1',
     analyticsModulePath: 'src/analytics.ts',
   })
@@ -190,7 +190,7 @@ describe('the walkthrough', () => {
   it('says what is missing and what it would unlock', () => {
     expect(markdown).toContain('What is missing')
     expect(markdown).toContain('purchase_completed')
-    expect(markdown).toContain('Consumer — viral loops')
+    expect(markdown).toContain('Consumer - viral loops')
   })
 
   it('publishes the role map so a wrong guess can be corrected', () => {

@@ -1,5 +1,5 @@
 /**
- * `openhog plan` — print the tracking plan as something a person can read in a
+ * `openhog plan` - print the tracking plan as something a person can read in a
  * standup, rather than 900 lines of JSON.
  */
 
@@ -49,7 +49,7 @@ export async function runPlan(argv: Argv): Promise<number> {
   const roles = Object.entries(plan.roles)
   if (roles.length) {
     log.plain()
-    log.plain(`  ${color.bold('ROLE MAP')} ${color.grey('— how the dashboard packs found your events')}`)
+    log.plain(`  ${color.bold('ROLE MAP')} ${color.grey('- how the dashboard packs found your events')}`)
     for (const [role, event] of roles) {
       log.plain(`    ${color.cyan(role.padEnd(24))} → ${event}`)
       const description = ROLE_DESCRIPTIONS[role as EventRole]
@@ -60,7 +60,7 @@ export async function runPlan(argv: Argv): Promise<number> {
   const unresolved = Object.keys(ROLE_DESCRIPTIONS).filter((role) => !plan.roles[role])
   if (unresolved.length) {
     log.plain()
-    log.plain(`  ${color.bold('UNRESOLVED ROLES')} ${color.grey('— charts you are not getting')}`)
+    log.plain(`  ${color.bold('UNRESOLVED ROLES')} ${color.grey('- charts you are not getting')}`)
     for (const role of unresolved) {
       log.plain(`    ${color.grey(role.padEnd(24))} ${color.grey(ROLE_DESCRIPTIONS[role as EventRole] ?? '')}`)
     }

@@ -65,7 +65,7 @@ export async function select<T extends string>(
   process.stdout.write(`${color.cyan('?')} ${question}\n`)
   choices.forEach((choice, index) => {
     const marker = choice.value === defaultValue ? color.green('●') : color.grey('○')
-    const hint = choice.hint ? color.grey(` — ${choice.hint}`) : ''
+    const hint = choice.hint ? color.grey(` - ${choice.hint}`) : ''
     process.stdout.write(`  ${marker} ${color.bold(String(index + 1))}. ${choice.label}${hint}\n`)
   })
   const answer = await ask(
@@ -85,7 +85,7 @@ export async function multiSelect<T extends string>(
   process.stdout.write(`${color.cyan('?')} ${question}\n`)
   choices.forEach((choice, index) => {
     const marker = defaultValues.includes(choice.value) ? color.green('◉') : color.grey('◯')
-    const hint = choice.hint ? color.grey(` — ${choice.hint}`) : ''
+    const hint = choice.hint ? color.grey(` - ${choice.hint}`) : ''
     process.stdout.write(`  ${marker} ${color.bold(String(index + 1))}. ${choice.label}${hint}\n`)
   })
   const answer = await ask(

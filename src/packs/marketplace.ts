@@ -25,7 +25,7 @@ export const marketplacePack: Pack = {
     return compact([
       dashboard({
         key: 'marketplace-liquidity',
-        name: 'Marketplace — liquidity',
+        name: 'Marketplace - liquidity',
         description:
           'Whether demand finds supply. A marketplace with plenty of both sides and no liquidity is two mailing lists.',
         question: 'Do searches turn into transactions?',
@@ -35,7 +35,7 @@ export const marketplacePack: Pack = {
             name: 'Search → listing → transaction',
             description: 'The core liquidity funnel.',
             interpretation:
-              'The search-to-listing step is a matching problem (inventory, ranking, filters). The listing-to-transaction step is a trust problem (photos, reviews, price, response time). They are fixed by completely different teams — read which one is leaking before assigning work.',
+              'The search-to-listing step is a matching problem (inventory, ranking, filters). The listing-to-transaction step is a trust problem (photos, reviews, price, response time). They are fixed by completely different teams - read which one is leaking before assigning work.',
             width: 'full',
             query: funnel({
               series: [search, listing, transaction]
@@ -84,7 +84,7 @@ export const marketplacePack: Pack = {
             name: 'Listing → contact',
             description: 'How often viewing a listing leads to a message or enquiry.',
             interpretation:
-              'In any marketplace with a negotiation step, this is the real conversion event. Response time on the other side is what determines whether it turns into money — instrument that next.',
+              'In any marketplace with a negotiation step, this is the real conversion event. Response time on the other side is what determines whether it turns into money - instrument that next.',
             width: 'half',
             query: funnel({
               series: [listing, message]
