@@ -1,0 +1,62 @@
+{
+  "name": "openhog",
+  "version": "0.1.0",
+  "description": "Read your codebase, instrument it, and build PostHog dashboards that are actually about your product. One command.",
+  "keywords": [
+    "posthog",
+    "analytics",
+    "product-analytics",
+    "tracking-plan",
+    "dashboards",
+    "instrumentation",
+    "observability",
+    "mcp"
+  ],
+  "homepage": "https://github.com/ZakKrevitt/OpenHog#readme",
+  "bugs": "https://github.com/ZakKrevitt/OpenHog/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZakKrevitt/OpenHog.git"
+  },
+  "license": "MIT",
+  "author": "Zak Krevitt",
+  "type": "module",
+  "bin": {
+    "openhog": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./packs": {
+      "types": "./dist/packs/index.d.ts",
+      "default": "./dist/packs/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "plugin",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run test && npm run build",
+    "prepublishOnly": "npm run verify"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

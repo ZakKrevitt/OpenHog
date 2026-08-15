@@ -1,0 +1,15 @@
+{
+  "name": "openhog",
+  "version": "0.1.0",
+  "description": "Read the codebase, instrument it, and build PostHog dashboards that are actually about this product.",
+  "author": "Zak Krevitt",
+  "homepage": "https://github.com/ZakKrevitt/OpenHog",
+  "license": "MIT",
+  "keywords": ["analytics", "posthog", "instrumentation", "dashboards"],
+  "mcpServers": {
+    "openhog": {
+      "command": "npx",
+      "args": ["-y", "openhog", "mcp"]
+    }
+  }
+}
