@@ -35,6 +35,18 @@ export interface MetricDefinition {
    * finding is raised from it.
    */
   minSample?: number
+  /**
+   * How many days of history the project needs before this number means
+   * anything.
+   *
+   * This guard exists because a young project answers every long-window query
+   * with a confident, plausible-looking lie. A three-day-old project returns a
+   * 30-day stickiness of 0.25 and a power-user share of 0% - the second of
+   * which reads as a critical finding - purely because nobody has had the
+   * chance to be active on five separate days yet. Sample size does not catch
+   * it: there were 5,534 people in that denominator.
+   */
+  minDays?: number
   /** Longer explanation, used in the report when the metric is shown. */
   explanation: string
 }

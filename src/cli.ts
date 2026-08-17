@@ -68,6 +68,7 @@ ${color.bold('COMMANDS')}
   ${color.cyan('demo')}       Seed realistic synthetic data so the dashboards are not empty
   ${color.cyan('plan')}       Print the tracking plan as a readable summary
   ${color.cyan('auth')}       Connect, re-connect or check your PostHog personal API key
+  ${color.cyan('selftest')}   Check every query OpenHog uses actually runs on your PostHog
   ${color.cyan('mcp')}        Run the MCP server, so an AI agent can read your analytics
 
 ${color.bold('COMMON OPTIONS')}
@@ -141,6 +142,10 @@ async function main(): Promise<number> {
     case 'auth': {
       const { runAuth } = await import('./commands/auth.js')
       return runAuth(argv)
+    }
+    case 'selftest': {
+      const { runSelftest } = await import('./commands/selftest.js')
+      return runSelftest(argv)
     }
     case 'mcp': {
       const { runMcp } = await import('./mcp/server.js')

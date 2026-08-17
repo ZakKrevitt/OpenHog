@@ -234,7 +234,7 @@ describe('not making claims off small samples', () => {
   it('stays quiet when there are only a handful of people', async () => {
     mock.state.hogql = [
       { match: /GROUP BY event/, rows: [['$pageview', 300, 40], ['signup_completed', 9, 9]] },
-      { match: /days_of_data/, rows: [[40, 309, 20]] },
+      { match: /days_of_data/, rows: [[40, 309, 90]] },
       { match: /dateDiff\('day', first_seen, last_seen\) >= 7/, rows: [[11, 1]] },
       { match: /countIf\(active_days = 1\) AS one_day/, rows: [[11, 10]] },
     ]
@@ -268,6 +268,86 @@ describe('not making claims off small samples', () => {
     // guard is on how many resolved, not on whether findings exist.
     const score = healthScore([], set)
     if (score) expect(score.basis).toContain('summarises the findings')
+  })
+})
+
+describe('a project too young to answer the question', () => {
+  let mock: MockServer
+
+  beforeEach(async () => {
+    mock = await startMockPostHog()
+  })
+  afterEach(async () => {
+    await mock.close()
+  })
+
+  /** A busy project that has only existed for three days. */
+  function youngProject(): MockServer['state']['hogql'] {
+    return [
+      {
+        match: /GROUP BY event\s+ORDER BY events DESC/,
+        rows: [
+          ['$pageview', 5573, 4359],
+          ['page_viewed', 5675, 4367],
+          ['auth_prompt_action', 3, 3],
+        ],
+      },
+      // Three days of history, but thousands of people in it.
+      { match: /days_of_data/, rows: [[5534, 34_495, 3]] },
+      // What a real three-day-old project actually returns for these.
+      { match: /avg\(daily\) AS avg_dau/, rows: [[1391, 5534]] },
+      { match: /countIf\(active_days >= 5\) AS power_users/, rows: [[5534, 0, 5508]] },
+      { match: /dateDiff\('day', first_seen, last_seen\) >= 7/, rows: [[0, 0]] },
+      { match: /countIf\(active_days = 1\) AS one_day/, rows: [[0, 0]] },
+    ]
+  }
+
+  it('withholds long-window metrics instead of answering them with nonsense', async () => {
+    // Verified against a real three-day-old PostHog project: it happily returns
+    // a 30-day stickiness of 0.25 and a power-user share of 0%. The sample is
+    // 5,534 people, so no sample-size check catches it.
+    mock.state.hogql = youngProject()
+    const client = new PostHogClient({
+      personalApiKey: 'phx_test',
+      hosts: customRegion(mock.url),
+      sleep: async () => {},
+    })
+    const set = await computeMetrics({ client, projectId: 1 })
+
+    expect(set.context.daysOfData).toBe(3)
+    for (const id of ['stickiness', 'power_user_share', 'retention_w1', 'retention_w4']) {
+      expect(set.values[id]?.value, `${id} must be withheld`).toBeNull()
+      expect(set.values[id]?.note).toMatch(/days of history/)
+    }
+  })
+
+  it('raises no product findings from a three-day-old project', async () => {
+    // 0% power users would otherwise read as a critical finding.
+    mock.state.hogql = youngProject()
+    const client = new PostHogClient({
+      personalApiKey: 'phx_test',
+      hosts: customRegion(mock.url),
+      sleep: async () => {},
+    })
+    const findings = deriveFindings(await computeMetrics({ client, projectId: 1 }))
+    for (const finding of findings) {
+      expect(
+        ['retention-low', 'retention-collapsing', 'stickiness-low', 'one-visit'],
+        `${finding.id} was claimed off three days of data`,
+      ).not.toContain(finding.id)
+    }
+  })
+
+  it('still answers the short-window questions', async () => {
+    mock.state.hogql = youngProject()
+    const client = new PostHogClient({
+      personalApiKey: 'phx_test',
+      hosts: customRegion(mock.url),
+      sleep: async () => {},
+    })
+    const set = await computeMetrics({ client, projectId: 1 })
+    // Three days is enough to know how many people are active.
+    expect(set.values.active_people?.value).not.toBeNull()
   })
 })
 

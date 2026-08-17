@@ -36,8 +36,20 @@ async function runMetric(
   metric: MetricRunner,
   options: ComputeOptions,
   roles: Record<string, string>,
+  daysOfData: number,
 ): Promise<MetricValue> {
   const base: MetricValue = { id: metric.id, value: null, confidence: 'none' }
+
+  // A young project answers long-window questions with confident nonsense, and
+  // no sample-size check catches it because the denominator is large. Verified
+  // against a real three-day-old project that reported a 30-day stickiness and
+  // a 0% power-user share, the second of which is a critical finding.
+  if (metric.minDays && daysOfData > 0 && daysOfData < metric.minDays) {
+    return {
+      ...base,
+      note: `Needs about ${metric.minDays} days of history to mean anything; this project has ${daysOfData}.`,
+    }
+  }
 
   const missing = (metric.requiresRoles ?? []).filter((role) => !roles[role])
   if (missing.length) {
@@ -108,7 +120,7 @@ export async function computeMetrics(options: ComputeOptions): Promise<MetricSet
   const values = await pooled(
     METRICS.map((metric) => async () => {
       progress(metric.name)
-      return runMetric(metric, options, roles)
+      return runMetric(metric, options, roles, discovery.daysOfData)
     }),
     options.concurrency ?? 4,
   )

@@ -248,3 +248,51 @@ describe('the CLI surface', () => {
     fixture.cleanup()
   })
 })
+
+describe('openhog selftest', () => {
+  let mock: MockServer
+
+  beforeAll(async () => {
+    mock = await startMockPostHog()
+    mock.state.hogql = [{ match: /days_of_data/, rows: [[5000, 100_000, 120]] }]
+  }, 30_000)
+
+  afterAll(async () => {
+    await mock.close()
+  })
+
+  it('reports every query as runnable when the deployment supports them', async () => {
+    const result = await run(
+      process.execPath,
+      [CLI, 'selftest', '--host', mock.url, '--project', '1', '--cwd', process.cwd()],
+      { env: { ...process.env, POSTHOG_PERSONAL_API_KEY: 'phx_test', NO_COLOR: '1' }, timeout: 60_000 },
+    )
+    expect(result.stdout).toContain('queries ran on this deployment')
+    expect(result.stdout).toContain('120 days of history')
+  }, 90_000)
+
+  it('exits 1 and names the failing query on a deployment that rejects it', async () => {
+    // An older self-hosted PostHog missing a function must be reported as a
+    // named failure, not as a silently thinner report.
+    mock.state.failQueriesMatching = /JSONExtractKeysAndValuesRaw/
+    await expect(
+      run(
+        process.execPath,
+        [CLI, 'selftest', '--host', mock.url, '--project', '1', '--cwd', process.cwd()],
+        { env: { ...process.env, POSTHOG_PERSONAL_API_KEY: 'phx_test', NO_COLOR: '1' }, timeout: 60_000 },
+      ),
+    ).rejects.toMatchObject({ code: 1, stdout: expect.stringContaining('Runaway properties') })
+    mock.state.failQueriesMatching = undefined
+  }, 90_000)
+
+  it('warns about metrics the project is too young for', async () => {
+    mock.state.hogql = [{ match: /days_of_data/, rows: [[5000, 100_000, 4]] }]
+    const result = await run(
+      process.execPath,
+      [CLI, 'selftest', '--host', mock.url, '--project', '1', '--cwd', process.cwd()],
+      { env: { ...process.env, POSTHOG_PERSONAL_API_KEY: 'phx_test', NO_COLOR: '1' }, timeout: 60_000 },
+    )
+    expect(result.stdout).toContain('need more history than this project has')
+    expect(result.stdout).toContain('Week-1 retention')
+  }, 90_000)
+})

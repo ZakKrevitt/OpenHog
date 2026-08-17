@@ -131,6 +131,31 @@ Better numbers for a vertical are [a very welcome PR](./CONTRIBUTING.md).
 
 ---
 
+## Does it work on *your* PostHog?
+
+HogQL is not one language. PostHog Cloud, a fresh self-hosted deployment and a
+six-month-old one differ in which functions exist and which syntax parses, so the
+query catalogue is executable on its own:
+
+```bash
+npx openhog selftest
+```
+
+It runs every query OpenHog uses against your project, reports which ones your
+deployment can answer, and prints PostHog's actual error for any that fail. Read-only,
+needs only `query:read`, writes nothing. If something fails, `--json` output is exactly
+what an issue needs.
+
+Every query in this package was verified against a live PostHog Cloud project before
+release. That found two bugs a mock never would: an `ARRAY JOIN` that aliased tuple
+elements (a hard ClickHouse error), and long-window metrics answering confidently on a
+project that had only existed for three days - a 30-day stickiness of 0.25 and a
+power-user share of 0%, off a sample of 5,534 people, which would have read as a
+critical finding. Metrics now declare how much history they need and are withheld below
+it.
+
+---
+
 ## The other half: fixing the instrumentation
 
 If the report says your data can't be trusted, OpenHog fixes that too.
@@ -139,6 +164,7 @@ If the report says your data can't be trusted, OpenHog fixes that too.
 npx openhog doctor    # why is nothing arriving?
 npx openhog init      # read the codebase, instrument it, build the dashboards
 npx openhog check     # has the code drifted from the plan? exits 1. good in a hook
+npx openhog selftest  # do all my queries run on your deployment?
 ```
 
 ### `openhog doctor`

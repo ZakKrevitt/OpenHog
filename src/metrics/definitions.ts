@@ -139,6 +139,7 @@ export const METRICS: MetricRunner[] = [
 
   {
     id: 'growth_rate',
+    minDays: 14,
     name: 'Week-on-week growth',
     question: 'Are more people arriving this week than last?',
     unit: 'percent',
@@ -177,6 +178,7 @@ export const METRICS: MetricRunner[] = [
   // -------------------------------------------------------------------------
   {
     id: 'retention_w1',
+    minDays: 21,
     name: 'Week-1 retention',
     question: 'Of the people who showed up, how many came back a week later?',
     unit: 'percent',
@@ -212,6 +214,7 @@ export const METRICS: MetricRunner[] = [
 
   {
     id: 'retention_w4',
+    minDays: 42,
     name: 'Week-4 retention',
     question: 'Does the retention curve flatten out, or fall to zero?',
     unit: 'percent',
@@ -246,6 +249,7 @@ export const METRICS: MetricRunner[] = [
 
   {
     id: 'stickiness',
+    minDays: 30,
     name: 'Stickiness (DAU/MAU)',
     question: 'How much of your monthly audience shows up on an average day?',
     unit: 'ratio',
@@ -284,6 +288,7 @@ export const METRICS: MetricRunner[] = [
 
   {
     id: 'power_user_share',
+    minDays: 30,
     name: 'Power users',
     question: 'What share of active people use it regularly rather than once?',
     unit: 'percent',
@@ -455,6 +460,7 @@ export const METRICS: MetricRunner[] = [
 
   {
     id: 'time_to_value',
+    minDays: 14,
     name: 'Time to first value',
     question: 'How long does it take someone to get something out of this?',
     unit: 'days',
@@ -489,8 +495,11 @@ export const METRICS: MetricRunner[] = [
         parse: (rows) => {
           const row = first(rows)
           const people = num(row[0])
+          // median() over an empty set is null, and Number(null) is 0, which
+          // would report "0 days to value" for a project where nobody has
+          // reached value at all.
           return {
-            value: num(row[1]),
+            value: people > 0 && row[1] !== null ? num(row[1]) : null,
             sample: people,
             extra: { p90_days: Number(num(row[2]).toFixed(1)) },
             confidence: people >= 100 ? 'high' : people >= 30 ? 'medium' : 'low',
@@ -505,6 +514,7 @@ export const METRICS: MetricRunner[] = [
   // -------------------------------------------------------------------------
   {
     id: 'one_visit_share',
+    minDays: 21,
     name: 'People who never came back',
     question: 'What share of people showed up exactly once and vanished?',
     unit: 'percent',
@@ -650,6 +660,7 @@ export const METRICS: MetricRunner[] = [
   // -------------------------------------------------------------------------
   {
     id: 'silent_events',
+    minDays: 30,
     name: 'Events that stopped arriving',
     question: 'Has any instrumentation broken recently?',
     unit: 'count',
@@ -698,18 +709,16 @@ export const METRICS: MetricRunner[] = [
           arrayStringConcat(arraySlice(groupArray(property), 1, 5), ', ') AS worst
         FROM (
           SELECT
-            key AS property,
-            uniq(value) AS distinct_values
+            kv.1 AS property,
+            uniq(kv.2) AS distinct_values
           FROM events
-          ARRAY JOIN
-            JSONExtractKeysAndValuesRaw(properties) AS kv,
-            kv.1 AS key,
-            kv.2 AS value
+          ARRAY JOIN JSONExtractKeysAndValuesRaw(properties) AS kv
           WHERE timestamp > now() - INTERVAL 7 DAY
-            AND NOT startsWith(key, '$')
+            AND NOT startsWith(kv.1, '$')
           GROUP BY property
           HAVING distinct_values > 50
           ORDER BY distinct_values DESC
+          LIMIT 40
         )
       `,
       parse: (rows) => {

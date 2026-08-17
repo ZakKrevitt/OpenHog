@@ -80,6 +80,24 @@ Adding a behaviour means adding a test that fails without it.
 
 ---
 
+## Verifying against a real PostHog
+
+The mock server proves the client, the retries and the report. It cannot prove the
+HogQL, because HogQL differs between deployments. Before changing anything in
+`src/metrics/definitions.ts`, run it for real:
+
+```bash
+npx openhog selftest --json
+```
+
+Two failure classes to think about when adding a metric:
+
+- **Syntax your deployment does not have.** Reported by selftest, contained by the
+  runner, and the metric shows as unavailable rather than breaking the report.
+- **A query that runs and answers nonsense.** Far more dangerous, and selftest cannot
+  catch it. A three-day-old project will happily return a 30-day stickiness. If your
+  metric's value is a function of elapsed time, give it a `minDays` floor.
+
 ## Two invariants
 
 Changes that break either of these will not be merged, however convenient:
