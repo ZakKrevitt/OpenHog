@@ -68,6 +68,7 @@ ${color.bold('COMMANDS')}
   ${color.cyan('demo')}       Seed realistic synthetic data so the dashboards are not empty
   ${color.cyan('plan')}       Print the tracking plan as a readable summary
   ${color.cyan('auth')}       Connect, re-connect or check your PostHog personal API key
+  ${color.cyan('describe')}   Write what your events mean into PostHog, for everyone to see
   ${color.cyan('selftest')}   Check every query OpenHog uses actually runs on your PostHog
   ${color.cyan('mcp')}        Run the MCP server, so an AI agent can read your analytics
 
@@ -87,6 +88,8 @@ ${color.bold('EXAMPLES')}
   npx openhog init --region eu --yes    ${color.grey('# unattended, EU cloud')}
   npx openhog doctor                    ${color.grey('# nothing is showing up in PostHog')}
   npx openhog check --strict            ${color.grey('# in a pre-push hook')}
+  npx openhog describe                  ${color.grey('# preview event descriptions for PostHog')}
+  npx openhog describe --write          ${color.grey('# and actually write them')}
   npx openhog demo --people 800         ${color.grey('# make the dashboards look alive')}
 
 ${color.grey('Docs: https://github.com/ZakKrevitt/OpenHog')}
@@ -142,6 +145,10 @@ async function main(): Promise<number> {
     case 'auth': {
       const { runAuth } = await import('./commands/auth.js')
       return runAuth(argv)
+    }
+    case 'describe': {
+      const { runDescribe } = await import('./commands/describe.js')
+      return runDescribe(argv)
     }
     case 'selftest': {
       const { runSelftest } = await import('./commands/selftest.js')

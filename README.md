@@ -162,6 +162,36 @@ it.
 
 ---
 
+## Make PostHog itself better, not just your terminal
+
+```bash
+npx openhog describe          # preview
+npx openhog describe --write  # apply
+```
+
+PostHog shows an event's description in the event list, the insight builder and every
+picker anybody opens. In a default project every one of them is empty, so each new
+person rediscovers what `auth_prompt_action` means by reading the codebase. This fills
+them in, from your tracking plan where you have one, from the role the event plays where
+you don't, and from its measured behaviour where neither applies. It never invents a
+meaning: an event nothing can explain gets its shape described, or is skipped.
+
+It is the only thing OpenHog does that changes what other people see, so it is the most
+cautious thing in the package:
+
+- **Previews by default.** Writing takes `--write`, and then asks.
+- **Never overwrites a description a human wrote** unless you pass `--overwrite`.
+- **The first write verifies itself.** One definition is patched and read back before any
+  others are attempted, so a deployment that rejects the call costs one event, not four
+  hundred. A 200 that did not persist is caught too.
+- **Writes `openhog-describe-rollback.json`** with every previous value before touching
+  anything.
+- **Idempotent.** Run it twice, the second run does nothing.
+
+Needs `event_definition:write` on your key.
+
+---
+
 ## The other half: fixing the instrumentation
 
 If the report says your data can't be trusted, OpenHog fixes that too.

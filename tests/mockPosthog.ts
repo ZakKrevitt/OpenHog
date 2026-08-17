@@ -25,6 +25,10 @@ export interface MockState {
   rateLimitTimes?: number
   /** Force a scope failure on this path fragment. */
   forbidPath?: string
+  /** Event definitions the project has, keyed by name. */
+  eventDefinitions?: { id: string; name: string; description?: string | null; tags?: string[] }[]
+  /** Accept the PATCH but do not persist it, the worst failure mode. */
+  swallowDefinitionWrites?: boolean
 }
 
 export interface MockServer {
@@ -163,7 +167,25 @@ export async function startMockPostHog(initial: Partial<MockState> = {}): Promis
 
       // --- event definitions ---
       if (path.endsWith('/event_definitions/')) {
-        return json(200, { results: [{ name: 'signup_completed', last_seen_at: new Date().toISOString() }] })
+        const defs = state.eventDefinitions ?? [
+          { id: 'def-1', name: 'signup_completed', description: null, tags: [] },
+        ]
+        return json(200, { results: defs, next: null })
+      }
+      const defMatch = path.match(/^\/api\/projects\/\d+\/event_definitions\/([\w-]+)\/$/)
+      if (defMatch) {
+        const defs = state.eventDefinitions ?? []
+        const def = defs.find((candidate) => candidate.id === defMatch[1])
+        if (!def) return json(404, { detail: 'Not found' })
+        if (req.method === 'PATCH') {
+          const patch = body as { description?: string; tags?: string[] }
+          if (!state.swallowDefinitionWrites) {
+            if (patch.description !== undefined) def.description = patch.description
+            if (patch.tags) def.tags = patch.tags
+          }
+          return json(200, def)
+        }
+        return json(200, def)
       }
 
       // --- ingest ---

@@ -23,6 +23,7 @@ import { resolvePersonalKey } from '../posthog/auth.js'
 import { planStats } from '../plan/generate.js'
 import { computeMetrics } from '../metrics/compute.js'
 import { discoverProject } from '../metrics/discover.js'
+import { buildDescriptions, toApply } from '../describe/descriptions.js'
 import { ALL_ROLES, ROLE_DESCRIPTIONS } from '../plan/roles.js'
 import { deriveFindings, healthScore, summarise } from '../insights/findings.js'
 
@@ -71,6 +72,12 @@ const TOOLS = [
       },
       required: ['roles'],
     },
+  },
+  {
+    name: 'preview_event_descriptions',
+    description:
+      "Show what OpenHog would write into PostHog's own event definitions - the descriptions that appear in the event list, the insight builder and every picker, for everyone in the organisation. Read-only: it never writes. Use it to check the wording before telling the user to run `openhog describe --write`, which is the only command that changes what other people see and which always asks first.",
+    inputSchema: { type: 'object', properties: {} },
   },
   {
     name: 'get_tracking_plan',
@@ -238,6 +245,33 @@ export async function runMcp(argv: Argv): Promise<number> {
           saved: roles,
           savedTo: configPath(root),
           note: 'Every future `openhog explain` in this directory uses these. Re-run explain_product to see the report with them applied.',
+        }
+      }
+
+      case 'preview_event_descriptions': {
+        const { client, projectId } = await getClient()
+        const [discovery, definitions] = await Promise.all([
+          discoverProject(client, projectId),
+          client.listEventDefinitions(projectId),
+        ])
+        const known = new Set(definitions.map((definition) => definition.name))
+        const proposals = buildDescriptions({
+          plan: loadPlan(root, config),
+          roles: { ...discovery.roles, ...config?.roles },
+          events: discovery.events,
+          existing: new Map(definitions.map((d) => [d.name, d.description])),
+          inferredRoles: discovery.inferredRoles,
+        }).filter((proposal) => known.has(proposal.event))
+        const { apply, keptExisting } = toApply(proposals)
+        return {
+          wouldWrite: apply.map((p) => ({
+            event: p.event,
+            description: p.description,
+            basedOn: p.source,
+          })),
+          leftAloneBecauseAHumanWroteOne: keptExisting.map((p) => p.event),
+          applyWith: 'openhog describe --write',
+          note: 'Nothing has been written. That command previews by default, asks before writing, never replaces a description somebody wrote, and saves every previous value to openhog-describe-rollback.json first.',
         }
       }
 

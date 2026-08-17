@@ -51,6 +51,15 @@ export function hostsForRegion(region: PostHogRegion, customHost?: string): Regi
   return REGIONS[region]
 }
 
+export interface EventDefinition {
+  id: string
+  name: string
+  description?: string | null
+  tags?: string[]
+  verified?: boolean
+  last_seen_at?: string
+}
+
 export class PostHogError extends Error {
   readonly status?: number
   readonly hint?: string
@@ -338,12 +347,46 @@ export class PostHogClient {
    * "no invented events" check: the plan says what the code emits, this says
    * what arrived, and the interesting set is the difference.
    */
-  async listEventDefinitions(projectId: number): Promise<{ name: string; last_seen_at?: string }[]> {
-    const response = await this.request<{ results: { name: string; last_seen_at?: string }[] }>(
-      `/api/projects/${projectId}/event_definitions/`,
-      { query: { limit: '500' } },
+  async listEventDefinitions(projectId: number): Promise<EventDefinition[]> {
+    const results: EventDefinition[] = []
+    // A mature project has more than one page of these, and describing only the
+    // first 500 would silently skip the rest.
+    for (let offset = 0; offset < 5000; offset += 500) {
+      const response = await this.request<{ results: EventDefinition[]; next?: string | null }>(
+        `/api/projects/${projectId}/event_definitions/`,
+        { query: { limit: '500', offset: String(offset) } },
+      )
+      const page = response.results ?? []
+      results.push(...page)
+      if (page.length < 500 || !response.next) break
+    }
+    return results
+  }
+
+  /**
+   * Write a description, tags or the verified flag onto an event definition.
+   *
+   * This is the one call OpenHog makes that changes what other people see. A
+   * description here surfaces throughout PostHog's own UI - the event list, the
+   * insight builder, every property picker - for everybody in the organisation,
+   * indefinitely. That reach is the point, and it is also why `openhog describe`
+   * previews by default and never overwrites something a human wrote.
+   */
+  async updateEventDefinition(
+    projectId: number,
+    definitionId: string,
+    patch: { description?: string; tags?: string[]; verified?: boolean },
+  ): Promise<EventDefinition> {
+    return this.request<EventDefinition>(
+      `/api/projects/${projectId}/event_definitions/${definitionId}/`,
+      { method: 'PATCH', body: patch },
     )
-    return response.results ?? []
+  }
+
+  async getEventDefinition(projectId: number, definitionId: string): Promise<EventDefinition> {
+    return this.request<EventDefinition>(
+      `/api/projects/${projectId}/event_definitions/${definitionId}/`,
+    )
   }
 
   async createAnnotation(
