@@ -149,6 +149,12 @@ export interface OpenHogConfig {
    * rather than in a flag somebody has to remember to pass again.
    */
   roles?: Record<string, string>
+  /**
+   * What this team is trying to move. Decides which findings lead the report,
+   * and makes "you cannot measure the thing you said you care about" a finding
+   * in its own right.
+   */
+  goal?: { focus: string; note?: string }
   /** Paths the scanner should not walk. Merged with the built-in ignore list. */
   ignore?: string[]
   /** Where generated files land, relative to repo root. */

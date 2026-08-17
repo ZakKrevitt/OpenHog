@@ -51,6 +51,30 @@ export interface Finding {
   evidence: Evidence[]
   confidence: 'high' | 'medium' | 'low'
   metricIds: string[]
+  /** Set when this finding bears on the goal the user said they were working on. */
+  goalRelevant?: boolean
+  /**
+   * Set on findings about the measurement rather than the product.
+   *
+   * These sort above everything else of the same severity, and above any goal,
+   * because a number produced by broken instrumentation is not a number. Left
+   * to impact scores alone this was only accidentally true: a retention finding
+   * at 100 outranked a "two events stopped arriving" finding at 99, and the
+   * report advised acting on a figure it had just said was unreliable.
+   */
+  trust?: boolean
+}
+
+/** Severity first, then trust, then the stated goal, then impact. */
+export function rankFindings(findings: Finding[]): Finding[] {
+  const order: Record<Severity, number> = { critical: 0, warning: 1, opportunity: 2, strength: 3 }
+  return [...findings].sort(
+    (a, b) =>
+      order[a.severity] - order[b.severity] ||
+      Number(Boolean(b.trust)) - Number(Boolean(a.trust)) ||
+      Number(Boolean(b.goalRelevant)) - Number(Boolean(a.goalRelevant)) ||
+      b.impact - a.impact,
+  )
 }
 
 type Rule = (set: MetricSet) => Finding | null
@@ -299,6 +323,7 @@ const silentEventsRule: Rule = (set) => {
 
   return {
     id: 'silent-events',
+    trust: true,
     severity: 'critical',
     impact: 99,
     title: `${metric.value} event${metric.value === 1 ? ' has' : 's have'} stopped arriving`,
@@ -319,6 +344,7 @@ const pageviewIntegrityRule: Rule = (set) => {
 
   return {
     id: 'pageview-integrity',
+    trust: true,
     severity: 'critical',
     impact: 97,
     title: 'The SDK is missing the first page load of every session',
@@ -341,6 +367,7 @@ const cardinalityRule: Rule = (set) => {
 
   return {
     id: 'runaway-properties',
+    trust: true,
     severity: 'warning',
     impact: 58,
     title: `${metric.value} propert${metric.value === 1 ? 'y is' : 'ies are'} carrying unbounded values`,
@@ -513,9 +540,7 @@ export function deriveFindings(set: MetricSet): Finding[] {
   findings.push(...blindSpotRules(set))
   findings.push(...strengthRules(set))
 
-  return findings.sort(
-    (a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] || b.impact - a.impact,
-  )
+  return rankFindings(findings)
 }
 
 /**

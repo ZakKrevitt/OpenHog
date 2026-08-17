@@ -16,6 +16,7 @@ import type { Argv } from '../cli.js'
 import { PRODUCT_KINDS, type ProductKind } from '../types.js'
 import { computeMetrics } from '../metrics/compute.js'
 import { deriveFindings, healthScore, summarise } from '../insights/findings.js'
+import { GOALS, applyGoal, goalBlindSpot, type Goal, type GoalContext } from '../insights/goals.js'
 import { renderTerminalReport } from '../report/terminal.js'
 import { renderHtmlReport } from '../report/html.js'
 import { loadConfig, loadPlan } from '../config.js'
@@ -84,12 +85,29 @@ export async function runExplain(argv: Argv): Promise<number> {
   })
   progress.stop()
 
-  const findings = deriveFindings(set)
+  // What the team said they were trying to move. A flag beats stored config,
+  // and either beats nothing.
+  const goalFlag = typeof argv.flags.goal === 'string' ? argv.flags.goal.trim() : undefined
+  const storedGoal = config?.goal?.focus
+  const focus = [goalFlag, storedGoal].find((value): value is Goal =>
+    Boolean(value && GOALS.includes(value as Goal)),
+  )
+  const goal: GoalContext | null = focus
+    ? { focus, note: goalFlag ? undefined : config?.goal?.note }
+    : null
+
+  let findings = deriveFindings(set)
+
+  // Not being able to measure the thing you said you care about outranks every
+  // other finding, and it is invisible to a tool that never asked.
+  const blindSpot = goalBlindSpot(goal, set.context.roles, (id) => set.values[id]?.value != null)
+  if (blindSpot) findings = [blindSpot, ...findings.filter((f) => f.id !== blindSpot.id)]
+  findings = applyGoal(findings, goal)
 
   if (argv.flags.json) {
     process.stdout.write(
       `${JSON.stringify(
-        { context: set.context, metrics: set.values, findings, score: healthScore(findings, set) },
+        { context: set.context, goal, metrics: set.values, findings, score: healthScore(findings, set) },
         null,
         2,
       )}\n`,
@@ -97,7 +115,7 @@ export async function runExplain(argv: Argv): Promise<number> {
     return findings.some((finding) => finding.severity === 'critical') ? 1 : 0
   }
 
-  renderTerminalReport(set, findings)
+  renderTerminalReport(set, findings, goal)
 
   // -------------------------------------------------------------------------
   // The shareable artefact
@@ -113,6 +131,7 @@ export async function runExplain(argv: Argv): Promise<number> {
       renderHtmlReport({
         set,
         findings,
+        goal,
         projectUrl: `${connection.client.hosts.host}/project/${connection.projectId}`,
       }),
     )
@@ -135,6 +154,11 @@ export async function runExplain(argv: Argv): Promise<number> {
   }
   log.plain()
 
+  if (!goal) {
+    log.info('Tell it what you are working on and the report leads with that:')
+    log.info(`${color.cyan('openhog explain --goal retention')}  (or ${GOALS.filter((g) => g !== 'retention').join(', ')})`)
+    log.plain()
+  }
   if (!plan) {
     log.info('Run `npx openhog init` in your codebase to turn these findings into dashboards,')
     log.info('and to catch the instrumentation problems that only show up in production.')

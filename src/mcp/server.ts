@@ -25,6 +25,7 @@ import { computeMetrics } from '../metrics/compute.js'
 import { discoverProject } from '../metrics/discover.js'
 import { buildDescriptions, toApply } from '../describe/descriptions.js'
 import { ALL_ROLES, ROLE_DESCRIPTIONS } from '../plan/roles.js'
+import { GOALS } from '../insights/goals.js'
 import { deriveFindings, healthScore, summarise } from '../insights/findings.js'
 
 interface JsonRpcRequest {
@@ -48,6 +49,27 @@ const TOOLS = [
           enum: ['saas', 'consumer', 'marketplace', 'ecommerce', 'ai-app', 'devtool', 'content'],
         },
       },
+    },
+  },
+  {
+    name: 'set_goal',
+    description:
+      "Record what this team is trying to move, so every future report leads with it and ranks findings by it. Ask the user rather than guessing - it is one question and the answer changes what the whole report emphasises. Setting it also makes 'you cannot measure the thing you said you care about' a critical finding, which is otherwise invisible.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        focus: {
+          type: 'string',
+          enum: ['acquisition', 'activation', 'retention', 'conversion', 'engagement', 'referral', 'reliability'],
+          description:
+            'acquisition: more people in. activation: new people reaching value. retention: people coming back. conversion: usage into revenue. engagement: depth of use. referral: users bringing users. reliability: fewer errors.',
+        },
+        note: {
+          type: 'string',
+          description: 'Optional free text in the user\'s own words, shown in the report. Never parsed.',
+        },
+      },
+      required: ['focus'],
     },
   },
   {
@@ -194,6 +216,29 @@ export async function runMcp(argv: Argv): Promise<number> {
           metrics: set.values,
         }
       }
+      case 'set_goal': {
+        const focus = String(args.focus ?? '')
+        if (!GOALS.includes(focus as never)) {
+          return { error: `Unknown goal "${focus}". One of: ${GOALS.join(', ')}` }
+        }
+        const existing = loadConfig(root)
+        if (!existing) {
+          return {
+            error:
+              'No openhog.config.json here. Run `openhog init` in the repository first, or set the goal with `openhog explain --goal ' + focus + '`.',
+          }
+        }
+        saveConfig(root, {
+          ...existing,
+          goal: { focus, note: typeof args.note === 'string' ? args.note : undefined },
+        })
+        return {
+          saved: { focus, note: args.note },
+          effect:
+            'Every future report leads with this goal, ranks findings bearing on it first, and raises a critical finding if the project cannot measure it.',
+        }
+      }
+
       case 'propose_role_mapping': {
         const { client, projectId } = await getClient()
         const discovery = await discoverProject(client, projectId)

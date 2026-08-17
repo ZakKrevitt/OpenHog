@@ -42,6 +42,8 @@ export { formatMetric, formatChange, type MetricSet, type MetricValue } from './
 export { metricById } from './metrics/definitions.js'
 export { deriveFindings, healthScore, summarise, type Finding, type Severity } from './insights/findings.js'
 export { bandFor, typicalRange, BENCHMARKS, KIND_LABELS } from './insights/benchmarks.js'
+export { GOALS, GOAL_DEFINITIONS, applyGoal, goalBlindSpot, type Goal, type GoalContext } from './insights/goals.js'
+export { buildDescriptions, toApply as descriptionsToApply } from './describe/descriptions.js'
 export { renderHtmlReport } from './report/html.js'
 export { renderTerminalReport } from './report/terminal.js'
 export { generateDemoEvents, seedDemoData, makeRandom } from './demo/seed.js'

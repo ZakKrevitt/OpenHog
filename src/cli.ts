@@ -80,10 +80,14 @@ ${color.bold('COMMON OPTIONS')}
   --yes, -y           Take every default. No prompts
   --quiet             Only print errors
   --json              Machine-readable output where supported
+  --goal <focus>      What you are working on, so the report leads with it:
+                      acquisition, activation, retention, conversion,
+                      engagement, referral, reliability
 
 ${color.bold('EXAMPLES')}
   npx openhog explain                   ${color.grey('# what is wrong with my product?')}
   npx openhog explain --open            ${color.grey('# and open the shareable report')}
+  npx openhog explain --goal retention  ${color.grey('# rank everything by what you are working on')}
   npx openhog init                      ${color.grey('# the one-command setup')}
   npx openhog init --region eu --yes    ${color.grey('# unattended, EU cloud')}
   npx openhog doctor                    ${color.grey('# nothing is showing up in PostHog')}

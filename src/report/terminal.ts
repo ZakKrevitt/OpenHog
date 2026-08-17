@@ -12,6 +12,7 @@ import { metricById } from '../metrics/definitions.js'
 import { typicalRange } from '../insights/benchmarks.js'
 import type { Finding, Severity } from '../insights/findings.js'
 import { healthScore } from '../insights/findings.js'
+import { GOAL_DEFINITIONS, type GoalContext } from '../insights/goals.js'
 
 const BADGE: Record<Severity, string> = {
   critical: color.red('● CRITICAL'),
@@ -36,7 +37,11 @@ function wrap(text: string, width = 76, indent = '     '): string[] {
   return lines
 }
 
-export function renderTerminalReport(set: MetricSet, findings: Finding[]): void {
+export function renderTerminalReport(
+  set: MetricSet,
+  findings: Finding[],
+  goal: GoalContext | null = null,
+): void {
   const context = set.context
 
   log.plain()
@@ -75,6 +80,26 @@ export function renderTerminalReport(set: MetricSet, findings: Finding[]): void 
     )}`,
   )
 
+  // The goal leads, whether or not anything is wrong with it. Somebody who said
+  // what they are working on should see its number before anything else.
+  if (goal) {
+    const definition = GOAL_DEFINITIONS[goal.focus]
+    const metric = set.values[definition.headlineMetric]
+    const definitionFor = metricById(definition.headlineMetric)
+    log.plain()
+    log.plain(`  ${color.bold('YOUR GOAL')}  ${color.grey(definition.label)}`)
+    if (metric?.value != null && definitionFor) {
+      const typical = typicalRange(definition.headlineMetric, context.productKind)
+      log.plain(
+        `  ${definitionFor.name}: ${color.bold(formatMetric(metric.value, definitionFor.unit))}` +
+          `${typical ? color.grey(`   typical ${typical}`) : ''}`,
+      )
+    } else {
+      log.plain(`  ${color.red('This project cannot currently measure it. See the first finding.')}`)
+    }
+    if (goal.note) log.plain(`  ${color.grey(goal.note)}`)
+  }
+
   if (!findings.length) {
     log.plain()
     log.warn('Not enough data to draw any conclusions yet.')
@@ -89,7 +114,10 @@ export function renderTerminalReport(set: MetricSet, findings: Finding[]): void 
   for (const finding of findings) {
     index += 1
     log.plain()
-    log.plain(`  ${BADGE[finding.severity]}${finding.confidence === 'medium' ? color.grey('  (small sample)') : ''}`)
+    const goalTag = finding.goalRelevant ? color.cyan('  ← your goal') : ''
+    log.plain(
+      `  ${BADGE[finding.severity]}${finding.confidence === 'medium' ? color.grey('  (small sample)') : ''}${goalTag}`,
+    )
     log.plain(`  ${color.bold(`${index}. ${finding.title}`)}`)
     log.plain()
     for (const line of wrap(finding.what)) log.plain(color.grey(line))

@@ -27,6 +27,7 @@ import { metricById } from '../metrics/definitions.js'
 import { KIND_LABELS, typicalRange } from '../insights/benchmarks.js'
 import type { Finding, Severity } from '../insights/findings.js'
 import { healthScore } from '../insights/findings.js'
+import { GOAL_DEFINITIONS, type GoalContext } from '../insights/goals.js'
 import { IBM_PLEX_MONO_WOFF2, INSTRUMENT_SANS_WOFF2 } from './fonts.js'
 
 function escapeHtml(value: string): string {
@@ -169,6 +170,14 @@ h1 {
 .count b { display: block; font-size: 25px; font-weight: 700; color: var(--ink); letter-spacing: -.025em; line-height: 1.15; }
 .count.critical b { color: var(--danger); }
 .scorebasis { font-size: 12.5px; color: var(--steel); margin: 14px 0 0; max-width: 68ch; line-height: 1.5; }
+.goal { margin: 26px 0 0; border-top: 1px solid var(--rule); padding-top: 18px; }
+.goal .n { font-size: 30px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.goal .miss { color: var(--danger); font-weight: 650; font-size: 16px; }
+.goal .note { color: var(--steel); font-size: 13px; margin-top: 6px; }
+.goaltag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  background: var(--acid); color: var(--black); padding: 3px 8px; margin-left: 10px;
+}
 
 h2 {
   margin: 70px 0 0;
@@ -276,8 +285,35 @@ footer p { margin: 0 0 8px; }
 export interface HtmlReportOptions {
   set: MetricSet
   findings: Finding[]
+  goal?: GoalContext | null
   generatedAt?: string
   projectUrl?: string
+}
+
+/** The goal band: its number, its typical range, or the fact it cannot be seen. */
+function goalBlock(options: HtmlReportOptions): string {
+  const goal = options.goal
+  if (!goal) return ''
+  const definition = GOAL_DEFINITIONS[goal.focus]
+  if (!definition) return ''
+  const metric = options.set.values[definition.headlineMetric]
+  const metricDefinition = metricById(definition.headlineMetric)
+  const typical = typicalRange(definition.headlineMetric, options.set.context.productKind)
+
+  const value =
+    metric?.value != null && metricDefinition
+      ? `<span class="n">${escapeHtml(formatMetric(metric.value, metricDefinition.unit))}</span>` +
+        (typical ? ` <span class="t">typical ${escapeHtml(typical)}</span>` : '')
+      : '<span class="miss">This project cannot currently measure it. See the first finding.</span>'
+
+  return `<div class="goal">
+    <div class="tag">Your goal</div>
+    <p class="sub" style="margin-top:8px">${escapeHtml(definition.label)}${
+      metricDefinition ? ` · ${escapeHtml(metricDefinition.name)}` : ''
+    }</p>
+    <div style="margin-top:6px">${value}</div>
+    ${goal.note ? `<p class="note">${escapeHtml(goal.note)}</p>` : ''}
+  </div>`
 }
 
 export function renderHtmlReport(options: HtmlReportOptions): string {
@@ -304,6 +340,9 @@ export function renderHtmlReport(options: HtmlReportOptions): string {
 
   const findingsHtml = findings
     .map((finding) => {
+      const goalTag = finding.goalRelevant
+        ? '<span class="goaltag">your goal</span>'
+        : ''
       const evidenceHtml = finding.evidence.length
         ? `<div class="evidence">${finding.evidence
             .map(
@@ -321,7 +360,7 @@ export function renderHtmlReport(options: HtmlReportOptions): string {
         <div class="fmeta">
           <span class="sev ${finding.severity}"><span class="dot"></span><span class="txt">${escapeHtml(
             SEVERITY_LABEL[finding.severity],
-          )}${finding.confidence === 'medium' ? ' · small sample' : ''}</span></span>
+          )}${finding.confidence === 'medium' ? ' · small sample' : ''}</span></span>${goalTag}
           ${finding.headline ? `<span class="fnum">${escapeHtml(finding.headline)}</span>` : ''}
         </div>
         <h3 class="ftitle">${escapeHtml(finding.title)}</h3>
@@ -392,6 +431,7 @@ export function renderHtmlReport(options: HtmlReportOptions): string {
     <div class="tally">${tally}</div>
   </div>
   ${score ? `<p class="scorebasis">${escapeHtml(score.basis)}</p>` : ''}
+  ${goalBlock(options)}
 </header>
 
 ${

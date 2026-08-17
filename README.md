@@ -81,6 +81,33 @@ Every finding carries **the number**, **how it compares to typical for your kind
 
 ---
 
+## Tell it what you're working on
+
+```bash
+npx openhog explain --goal retention
+```
+
+Every analytics tool reports the same thirty numbers to everybody. A team about to run
+out of money and a team making a working product stickier need different things said to
+them. One flag changes three things:
+
+- **The goal's own number leads the report**, with its typical range, whether or not
+  anything is wrong with it.
+- **Findings that bear on it rank first**, tagged `← your goal`. Same project, two
+  goals, two different things to do next.
+- **Not being able to measure it becomes the top finding.** Say retention is the
+  priority and have no way to see it, and that is the most expensive gap you have. It
+  is invisible to a tool that never asked.
+
+`acquisition`, `activation`, `retention`, `conversion`, `engagement`, `referral`,
+`reliability`. Saved to config once set, so you only say it once.
+
+One thing always outranks it: findings about the measurement itself. A goal measured
+with broken instrumentation is not measured, so "two events stopped arriving" stays
+above anything you said you cared about.
+
+---
+
 ## It works on the events you already have
 
 You don't name your events the way a tool expects. Nobody does.
