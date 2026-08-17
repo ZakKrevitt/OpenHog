@@ -52,8 +52,8 @@ export function parseArgs(argv: string[]): Argv {
 }
 
 const HELP = `
-${color.bold('openhog')} - read your codebase, instrument it, and build PostHog dashboards
-          that are actually about your product.
+${color.bold('openhog')} - make your PostHog data actionable, understandable,
+          and dead simple to use.
 
 ${color.bold('USAGE')}
   npx openhog <command> [options]

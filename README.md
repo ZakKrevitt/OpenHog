@@ -10,9 +10,15 @@ npx openhog explain
 
 *No repo. No config. No code changes. Just your PostHog key and thirty seconds.*
 
-[![npm](https://img.shields.io/npm/v/openhog?color=%23C4F236&labelColor=0D0D0D)](https://www.npmjs.com/package/openhog)
 [![license](https://img.shields.io/badge/license-MIT-0D0D0D)](./LICENSE)
 [![zero dependencies](https://img.shields.io/badge/dependencies-0-C4F236?labelColor=0D0D0D)](./package.json)
+[![node](https://img.shields.io/badge/node-%E2%89%A520.11-0D0D0D)](./package.json)
+
+<sub>Not on npm yet. Until it is, this works today and does the same thing:</sub>
+
+```bash
+npx github:ZakKrevitt/OpenHog explain
+```
 
 **Built by [Dizko Labs](https://www.dizko.app).** Dizko uses real-world intelligence to help you
 discover events and coordinate going to them with your friends.
@@ -215,12 +221,26 @@ There's a **Claude Code plugin** in [`plugin/`](./plugin) too, including a brows
 
 ## Install
 
+Straight from GitHub, nothing published required:
+
+```bash
+npx github:ZakKrevitt/OpenHog explain
+```
+
+That clones, builds and runs it: about 8 seconds cold, 2 seconds after npm has cached
+it. Once it is on npm the shorter form works too:
+
 ```bash
 npx openhog explain       # nothing to install
 npm i -D openhog          # or keep it for `check` in a hook
 ```
 
-Node ≥ 20.11. PostHog Cloud US, Cloud EU, or self-hosted (`--host https://posthog.internal`).
+**Pointing an agent at it?** Give it this repository URL and the command. Everything an
+agent needs is in this README, and there is a Claude Code plugin in [`plugin/`](./plugin)
+with a skill that knows the whole workflow, including how to walk a human through
+getting the API key without ever seeing the key itself.
+
+Node ≥ 20.11 and git. PostHog Cloud US, Cloud EU, or self-hosted (`--host https://posthog.internal`).
 
 You'll need a personal API key with `project:read`, `insight:write`, `dashboard:write`, `query:read`. `openhog auth` walks you through it: opens the right page, names the scopes, takes the paste without echoing it, and proves it works before saving.
 
