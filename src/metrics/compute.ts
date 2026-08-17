@@ -141,6 +141,7 @@ export async function computeMetrics(options: ComputeOptions): Promise<MetricSet
       projectId: options.projectId,
       productKind,
       roles,
+      inferredRoles: discovery.inferredRoles.filter((role) => !options.roles?.[role]),
       eventVolumes: discovery.events,
       activePeople: discovery.activePeople,
       totalEvents: discovery.totalEvents,

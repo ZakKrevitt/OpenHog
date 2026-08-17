@@ -92,8 +92,12 @@ const RULES: Record<EventRole, RoleRule> = {
       /^(user|account|member)_(created|registered|signed_up)$/,
       /^(sign_?up|register)$/,
       /_signed_up$/,
+      // de / es / pt / fr / it: registriert, registrado, inscrit, iscritto.
+      /^(nutzer|benutzer|usuario|utilisateur|utente|usuario)_(registriert|registrado|inscrit|iscritto|criado|creado)$/,
+      /^(registrierung|registro|inscription|registrazione|cadastro)_(abgeschlossen|completado|complete|termine|completata|concluido)$/,
+      /_(registriert|registrado|inscrit|cadastrado)$/,
     ],
-    exclude: [/fail|error|abandon|start|attempt/],
+    exclude: [/fail|error|abandon|start|attempt|fehler|erreur|abandono/],
     description: 'An account now exists that did not before.',
   },
   signin: {
@@ -130,9 +134,15 @@ const RULES: Record<EventRole, RoleRule> = {
   },
   search: {
     weight: 5,
-    include: [/^search(_|$)/, /_search(_submit|_submitted|ed)?$/, /^query_(submitted|sent)$/],
-    weak: [/search/, /^filter_(apply|applied|submit)/],
-    exclude: [/error|fail|empty|result/],
+    include: [
+      /^search(_|$)/,
+      /_search(_submit|_submitted|ed)?$/,
+      /^query_(submitted|sent)$/,
+      // de / es / fr / it / pt
+      /^(suche|suchanfrage|busqueda|recherche|ricerca|busca|pesquisa)(_|$)/,
+    ],
+    weak: [/search|suche|busqueda|recherche|ricerca|busca/, /^filter_(apply|applied|submit)/],
+    exclude: [/error|fail|empty|result|fehler|erreur/],
     description: 'The user looked for something.',
   },
   content_opened: {
@@ -160,8 +170,13 @@ const RULES: Record<EventRole, RoleRule> = {
   },
   share: {
     weight: 6,
-    include: [/^share/, /_shared?$/, /_share_(click|clicked|completed)$/],
-    exclude: [/error|fail/],
+    include: [
+      /^share/,
+      /_shared?$/,
+      /_share_(click|clicked|completed)$/,
+      /(^|_)(geteilt|teilen|compartido|compartir|partage|condiviso)(_|$)/,
+    ],
+    exclude: [/error|fail|fehler/],
     description: 'The user pushed something out of the product.',
   },
   invite_sent: {
@@ -206,8 +221,11 @@ const RULES: Record<EventRole, RoleRule> = {
       /^(purchase|order|payment|transaction)_(completed?|succeeded|success|placed|confirmed)$/,
       /^(purchase|checkout_completed|order_placed)$/,
       /_purchased$/,
+      // de / es / fr / it / pt
+      /^(bestellung|kauf|compra|commande|acquisto|pedido)_(abgeschlossen|completada|completa|termine|confirmado|concluido)$/,
+      /_(gekauft|comprado|achete|acquistato)$/,
     ],
-    exclude: [/fail|error|refund|cancel|start/],
+    exclude: [/fail|error|refund|cancel|start|fehler|erreur|erro/],
     description: 'Money changed hands.',
   },
   subscription_started: {
@@ -260,7 +278,16 @@ const RULES: Record<EventRole, RoleRule> = {
   },
   error: {
     weight: 5,
-    include: [/error/, /_failed$/, /^failure/, /_fail$/, /^exception/],
+    include: [
+      /error/,
+      /_failed$/,
+      /^failure/,
+      /_fail$/,
+      /^exception/,
+      // de / es+pt / fr / it
+      /(^|_)(fehler|erro|erreur|errore)(_|$)/,
+      /(fehlgeschlagen|fallido|echoue|fallito)$/,
+    ],
     description: 'Something broke in front of the user.',
   },
   empty_state: {
@@ -293,7 +320,34 @@ export interface RoleResolution {
   description: string
 }
 
-function scoreEvent(name: string, rule: RoleRule): number {
+/**
+ * Reduce an event name to a canonical form for matching only.
+ *
+ * Every team names events differently, and the difference is usually
+ * punctuation rather than meaning. PostHog projects in the wild carry
+ * `User Signed Up` (the Segment "Object Action" convention), `userSignedUp`,
+ * `user-signed-up`, `user.signed_up` and `user:signed_up` for exactly the same
+ * thing. Matching the raw string against snake_case patterns resolved none of
+ * them: measured across ten real-world taxonomies, Title Case scored 0 of 9
+ * roles and kebab-case 0 of 9, against 7 of 9 for English snake_case.
+ *
+ * The original name is what gets queried. This form is only ever used to decide
+ * which role a name plays.
+ */
+export function matchableName(name: string): string {
+  return name
+    // camelCase and PascalCase, including acronym runs like `APIKeyCreated`.
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+    // Every other separator teams use.
+    .replace(/[\s.\-:/\\|]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
+    .toLowerCase()
+}
+
+function scoreEvent(rawName: string, rule: RoleRule): number {
+  const name = matchableName(rawName)
   if (rule.exclude?.some((pattern) => pattern.test(name))) return 0
   let best = 0
   const score = (patterns: RegExp[] | undefined, base: number, anchorBonus: number) => {

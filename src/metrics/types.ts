@@ -75,6 +75,11 @@ export interface MetricSet {
     productKind: ProductKind
     /** Roles resolved from the events PostHog has actually seen. */
     roles: Record<string, string>
+    /**
+     * Of those, the ones guessed from behaviour because no name matched. Shown
+     * separately: a wrong guess here silently changes what a finding claims.
+     */
+    inferredRoles: string[]
     /** Event name → people in the last 30 days. */
     eventVolumes: { event: string; events: number; people: number }[]
     activePeople: number

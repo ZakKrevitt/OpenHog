@@ -26,6 +26,12 @@ export interface EventVolume {
 export interface Discovery {
   events: EventVolume[]
   roles: Record<string, string>
+  /**
+   * Roles that came from behaviour rather than from the event's name. These are
+   * guesses and are labelled as such wherever they are shown, because a wrong
+   * one silently changes what a finding claims.
+   */
+  inferredRoles: string[]
   activePeople: number
   totalEvents: number
   daysOfData: number
@@ -98,19 +104,90 @@ export async function discoverProject(
   }))
 
   const volumes = Object.fromEntries(eligible.map((entry) => [entry.event, entry.people]))
-  const roles = roleMap(resolveRoles(planEvents, { volumes }))
+  const namedRoles = roleMap(resolveRoles(planEvents, { volumes }))
+
+  // Vocabulary runs out. `kyc_passed`, `level_completed`, `nutzer_registriert`
+  // and `usr_reg_ok` all mean something a pattern list will never cover, and a
+  // tool other people install has to cope with taxonomies nobody has seen.
+  // Behaviour is language-independent, so it fills what the names could not.
+  const { roles, inferred } = inferRolesFromShape(namedRoles, eligible, num(shape[0]))
 
   const kind = guessKindFromEvents(events.map((entry) => entry.event))
 
   return {
     events,
     roles,
+    inferredRoles: inferred,
     activePeople: num(shape[0]),
     totalEvents: num(shape[1]),
     daysOfData: num(shape[2]),
     productKind: kind.kind,
     kindReasons: kind.reasons,
   }
+}
+
+/**
+ * Fill unresolved roles from the shape of the data rather than from names.
+ *
+ * Two signals, both free because discovery already counts events and people:
+ *
+ *   - **Events per person near 1.0** means a milestone: something that happens
+ *     once in a person's life, like signing up or completing onboarding. If it
+ *     also covers a minority of people, it is a conversion step rather than
+ *     something everyone does.
+ *   - **A high events-per-person ratio** on a non-pageview event means a
+ *     habitual action: the thing the product is actually for.
+ *
+ * Neither depends on the language the event was named in, which is the point.
+ * Both are guesses, so they only ever fill a role the names could not, and they
+ * are reported separately so nobody mistakes them for a reading of intent.
+ */
+function inferRolesFromShape(
+  named: Record<string, string>,
+  events: EventVolume[],
+  totalPeople: number,
+): { roles: Record<string, string>; inferred: string[] } {
+  const roles = { ...named }
+  const inferred: string[] = []
+  const taken = new Set(Object.values(roles))
+
+  const candidates = events.filter(
+    (entry) =>
+      !entry.event.startsWith('$') &&
+      !taken.has(entry.event) &&
+      entry.people >= 20 &&
+      entry.events > 0,
+  )
+  if (!candidates.length || totalPeople <= 0) return { roles, inferred }
+
+  const perPerson = (entry: EventVolume) => entry.events / Math.max(1, entry.people)
+  const reach = (entry: EventVolume) => entry.people / totalPeople
+
+  // A once-per-person event that a minority reach is a conversion milestone.
+  if (!roles.signup_completed) {
+    const milestone = candidates
+      .filter((entry) => perPerson(entry) <= 1.35 && reach(entry) > 0.02 && reach(entry) < 0.9)
+      .sort((a, b) => b.people - a.people)[0]
+    if (milestone) {
+      roles.signup_completed = milestone.event
+      taken.add(milestone.event)
+      inferred.push('signup_completed')
+    }
+  }
+
+  // The most-repeated non-pageview event is the habitual one.
+  if (!roles.core_action && !roles.activation) {
+    const habitual = candidates
+      .filter((entry) => !taken.has(entry.event) && perPerson(entry) >= 2)
+      .sort((a, b) => perPerson(b) * b.people - perPerson(a) * a.people)[0]
+    if (habitual) {
+      roles.core_action = habitual.event
+      taken.add(habitual.event)
+      inferred.push('core_action')
+    }
+  }
+
+  return { roles, inferred }
 }
 
 /**

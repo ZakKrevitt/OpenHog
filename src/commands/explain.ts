@@ -62,7 +62,9 @@ export async function runExplain(argv: Argv): Promise<number> {
       ? (kindFlag as ProductKind)
       : (plan?.product.kind ?? config?.product.kind)
 
-  const roles = { ...plan?.roles, ...parseRoleOverrides(argv.flags.role) }
+  // Least specific to most: what the code said, what somebody saved after
+  // correcting it, then what this invocation asked for.
+  const roles = { ...plan?.roles, ...config?.roles, ...parseRoleOverrides(argv.flags.role) }
 
   let projectName = `Project ${connection.projectId}`
   try {

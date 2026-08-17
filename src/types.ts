@@ -140,6 +140,15 @@ export interface OpenHogConfig {
     kind: ProductKind
     packs: string[]
   }
+  /**
+   * Role to event-name overrides, applied on top of whatever OpenHog resolves.
+   *
+   * This is where a correction becomes permanent. Vocabulary matching cannot
+   * cover domain jargon, abbreviations or every language, so when a human or an
+   * agent works out that `kyc_passed` is this product's signup, it belongs here
+   * rather than in a flag somebody has to remember to pass again.
+   */
+  roles?: Record<string, string>
   /** Paths the scanner should not walk. Merged with the built-in ignore list. */
   ignore?: string[]
   /** Where generated files land, relative to repo root. */

@@ -143,7 +143,15 @@ export function renderTerminalReport(set: MetricSet, findings: Finding[]): void 
     log.plain(`  ${color.bold('HOW IT READ YOUR EVENTS')} ${color.grey('- wrong? pass --role name=your_event')}`)
     log.plain()
     for (const [role, event] of roles.slice(0, 14)) {
-      log.plain(`  ${color.cyan(role.padEnd(24))} ${color.grey('→')} ${event}`)
+      const guessed = context.inferredRoles.includes(role)
+        ? color.yellow('  guessed from behaviour, check this')
+        : ''
+      log.plain(`  ${color.cyan(role.padEnd(24))} ${color.grey('→')} ${event}${guessed}`)
+    }
+    if (context.inferredRoles.length) {
+      log.plain()
+      log.info('Roles marked "guessed" were matched on how the event behaves, not what it')
+      log.info('is called, because no name matched. Worth a look before trusting them.')
     }
   }
   log.plain()

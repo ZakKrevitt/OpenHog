@@ -224,6 +224,7 @@ h2 {
 }
 .ev .v { font-size: 19px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .ev .t { font-size: 12px; color: var(--steel); margin-left: 7px; font-weight: 400; letter-spacing: 0; }
+.roles .t { font-size: 12px; color: var(--steel); font-weight: 400; }
 
 table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 th {
@@ -348,10 +349,12 @@ export function renderHtmlReport(options: HtmlReportOptions): string {
     .join('')
 
   const rolesHtml = Object.entries(context.roles)
-    .map(
-      ([role, event]) =>
-        `<div class="r">${escapeHtml(role)}</div><div class="e">${escapeHtml(event)}</div>`,
-    )
+    .map(([role, event]) => {
+      const guessed = context.inferredRoles.includes(role)
+        ? ' <span class="t">guessed from behaviour, not from the name</span>'
+        : ''
+      return `<div class="r">${escapeHtml(role)}</div><div class="e">${escapeHtml(event)}${guessed}</div>`
+    })
     .join('')
 
   const topEvents = context.eventVolumes

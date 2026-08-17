@@ -16,12 +16,14 @@ import { resolve } from 'node:path'
 import type { Argv } from '../cli.js'
 import { scan } from '../scan/index.js'
 import { checkDrift } from '../check.js'
-import { loadConfig, loadPlan } from '../config.js'
+import { configPath, loadConfig, loadPlan, saveConfig } from '../config.js'
 import { runDoctor } from '../doctor/index.js'
 import { PostHogClient, hostsForRegion } from '../posthog/client.js'
 import { resolvePersonalKey } from '../posthog/auth.js'
 import { planStats } from '../plan/generate.js'
 import { computeMetrics } from '../metrics/compute.js'
+import { discoverProject } from '../metrics/discover.js'
+import { ALL_ROLES, ROLE_DESCRIPTIONS } from '../plan/roles.js'
 import { deriveFindings, healthScore, summarise } from '../insights/findings.js'
 
 interface JsonRpcRequest {
@@ -45,6 +47,29 @@ const TOOLS = [
           enum: ['saas', 'consumer', 'marketplace', 'ecommerce', 'ai-app', 'devtool', 'content'],
         },
       },
+    },
+  },
+  {
+    name: 'propose_role_mapping',
+    description:
+      "Returns this project's event names with their volumes, which semantic roles are still unmapped, and what each role means - so YOU can map the ones no pattern could. Use this whenever a report says a role was unresolved or 'guessed from behaviour', and whenever the project's events are not English snake_case. Vocabulary matching cannot cover domain jargon (kyc_passed, level_completed), abbreviations (usr_reg_ok) or languages it was not written for; you can. Read the events, decide which one plays each unmapped role, then call save_role_mapping with your answer.",
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'save_role_mapping',
+    description:
+      'Persist a role-to-event mapping so every future report uses it. Only map a role when you are confident from the event name, its volume, or the codebase; a wrong mapping silently changes what a finding claims, and leaving a role unmapped is always better than mapping it wrongly.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        roles: {
+          type: 'object',
+          description:
+            'Role name to event name, e.g. {"signup_completed": "kyc_passed", "core_action": "transfer_sent"}. Event names must be ones this project actually sends.',
+          additionalProperties: { type: 'string' },
+        },
+      },
+      required: ['roles'],
     },
   },
   {
@@ -162,6 +187,60 @@ export async function runMcp(argv: Argv): Promise<number> {
           metrics: set.values,
         }
       }
+      case 'propose_role_mapping': {
+        const { client, projectId } = await getClient()
+        const discovery = await discoverProject(client, projectId)
+        const mapped = new Set(Object.keys(discovery.roles))
+        return {
+          instructions:
+            'Map any role in `unmapped` that one of these events clearly plays, then call save_role_mapping. Leave a role out rather than guessing: an unmapped role removes the findings that need it, but a wrong one makes those findings lie. Also re-check anything in `guessedFromBehaviour` - those were inferred from how the event behaves, not from what it is called.',
+          events: discovery.events.slice(0, 120).map((entry) => ({
+            event: entry.event,
+            people: entry.people,
+            events: entry.events,
+            perPerson: Number((entry.events / Math.max(1, entry.people)).toFixed(2)),
+          })),
+          currentMapping: discovery.roles,
+          guessedFromBehaviour: discovery.inferredRoles,
+          unmapped: ALL_ROLES.filter((role) => !mapped.has(role)).map((role) => ({
+            role,
+            means: ROLE_DESCRIPTIONS[role],
+          })),
+          savedTo: configPath(root),
+        }
+      }
+
+      case 'save_role_mapping': {
+        const input = (args.roles ?? {}) as Record<string, unknown>
+        const roles: Record<string, string> = {}
+        for (const [role, event] of Object.entries(input)) {
+          if (typeof event === 'string' && event.trim()) roles[role] = event.trim()
+        }
+        if (!Object.keys(roles).length) return { error: 'No roles given.' }
+
+        const existing = loadConfig(root)
+        const next = {
+          ...(existing ?? {
+            version: 1 as const,
+            posthog: {
+              region: 'us' as const,
+              host: 'https://us.posthog.com',
+              ingestHost: 'https://us.i.posthog.com',
+              assetHost: 'https://us-assets.i.posthog.com',
+              publicKeyEnv: 'POSTHOG_KEY',
+            },
+            product: { kind: 'consumer' as const, packs: ['core'] },
+          }),
+          roles: { ...existing?.roles, ...roles },
+        }
+        saveConfig(root, next)
+        return {
+          saved: roles,
+          savedTo: configPath(root),
+          note: 'Every future `openhog explain` in this directory uses these. Re-run explain_product to see the report with them applied.',
+        }
+      }
+
       case 'get_tracking_plan': {
         const plan = loadPlan(root, config)
         if (!plan) return { error: 'No tracking plan. Run `openhog init` in this repository.' }
