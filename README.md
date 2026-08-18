@@ -2,23 +2,22 @@
 
 # 🦔 OpenHog
 
-**Make your PostHog data actionable, understandable, and dead simple to use.**
+### Your PostHog is full of data and empty of answers.
 
-```bash
-npx openhog explain
-```
-
-*No repo. No config. No code changes. Just your PostHog key and thirty seconds.*
-
-[![license](https://img.shields.io/badge/license-MIT-0D0D0D)](./LICENSE)
-[![zero dependencies](https://img.shields.io/badge/dependencies-0-C4F236?labelColor=0D0D0D)](./package.json)
-[![node](https://img.shields.io/badge/node-%E2%89%A520.11-0D0D0D)](./package.json)
-
-<sub>Not on npm yet. Until it is, this works today and does the same thing:</sub>
+**One command reads your project and tells you what to do about it.**
 
 ```bash
 npx github:ZakKrevitt/OpenHog explain
 ```
+
+<sub>No repo. No config. No code changes. Just your PostHog key and thirty seconds.</sub>
+
+[![license](https://img.shields.io/badge/license-MIT-0D0D0D)](./LICENSE)
+[![zero dependencies](https://img.shields.io/badge/dependencies-0-C4F236?labelColor=0D0D0D)](./package.json)
+[![node](https://img.shields.io/badge/node-%E2%89%A520.11-0D0D0D)](./package.json)
+[![tests](https://img.shields.io/badge/tests-313%20passing-C4F236?labelColor=0D0D0D)](./tests)
+
+<img src="docs/demo.svg" width="820" alt="Terminal running npx openhog explain --goal retention. It prints a 30/100 product health score, then three critical findings: two events have stopped arriving so any number depending on them is wrong; only 8.9% of people come back after a week against a typical 15 to 45%; and 78% of people who sign up never reach the point of value. Each finding ends with one concrete action.">
 
 **Built by [Dizko Labs](https://www.dizko.app).** Dizko uses real-world intelligence to help you
 discover events and coordinate going to them with your friends.
@@ -278,14 +277,14 @@ There's a **Claude Code plugin** in [`plugin/`](./plugin) too, including a brows
 
 ## Install
 
-Straight from GitHub, nothing published required:
-
 ```bash
 npx github:ZakKrevitt/OpenHog explain
 ```
 
-That clones, builds and runs it: about 8 seconds cold, 2 seconds after npm has cached
-it. Once it is on npm the shorter form works too:
+Clones, builds and runs: about 8 seconds cold, 2 seconds once npm has cached it.
+Nothing to install, nothing published required.
+
+Not on npm yet, so the short form is not live. When it is:
 
 ```bash
 npx openhog explain       # nothing to install
